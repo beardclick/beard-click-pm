@@ -13,7 +13,8 @@ export async function getMeetings() {
     `)
     .order('starts_at', { ascending: true })
 
-  return data
+  if (error) return []
+  return data || []
 }
 
 export async function getClientMeetings(clientId: string) {
@@ -31,7 +32,7 @@ export async function getClientMeetings(clientId: string) {
     console.error('Error fetching client meetings:', error)
     return []
   }
-  return data
+  return data || []
 }
 
 
@@ -115,5 +116,5 @@ export async function getProjectMeetings(projectId: string) {
     .order('starts_at', { ascending: true })
 
   if (error) return []
-  return data
+  return data || []
 }

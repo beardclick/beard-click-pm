@@ -45,7 +45,7 @@ export default async function MeetingsPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {meetings.length > 0 ? meetings.map((meeting) => (
+              {meetings && meetings.length > 0 ? meetings.map((meeting) => (
                 <TableRow key={meeting.id} hover>
                   <TableCell>
                     <Typography variant="body2" sx={{fontWeight: 600}}>
