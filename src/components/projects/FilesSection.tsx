@@ -200,8 +200,8 @@ export function FilesSection({ projectId, initialFiles }: { projectId: string, i
                         primary={file.name}
                         secondary={`${formatSize(file.size)} • Por ${file.profiles?.full_name}`}
                         slotProps={{
-                          primaryTypography: { variant: 'body2', sx: { fontWeight: 500 } },
-                          secondaryTypography: { variant: 'caption' }
+                          primary: { variant: 'body2', sx: { fontWeight: 500 } } as any,
+                          secondary: { variant: 'caption' } as any
                         }}
                       />
                     </ListItem>
