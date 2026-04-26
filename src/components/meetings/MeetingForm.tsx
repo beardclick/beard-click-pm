@@ -83,7 +83,7 @@ export function MeetingForm({ projects }: MeetingFormProps) {
               type="datetime-local"
               fullWidth
               required
-              InputLabelProps={{ shrink: true }}
+              slotProps={{ inputLabel: { shrink: true } }}
               helperText="Duración estimada: 1 hora"
             />
 
@@ -102,7 +102,7 @@ export function MeetingForm({ projects }: MeetingFormProps) {
             />
 
             {error && (
-              <Typography color="error" variant="body2">
+              <Typography color="error" variant="body2" sx={{fontWeight: 400}}>
                 {error}
               </Typography>
             )}
@@ -133,4 +133,3 @@ export function MeetingForm({ projects }: MeetingFormProps) {
     </Card>
   )
 }
-

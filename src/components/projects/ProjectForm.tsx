@@ -8,7 +8,7 @@ import Box from '@mui/material/Box'
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import Paper from '@mui/material/Paper'
-import Grid from '@mui/material/Grid'
+import Grid from '@mui/material/Grid2'
 import Alert from '@mui/material/Alert'
 import MenuItem from '@mui/material/MenuItem'
 
@@ -88,9 +88,8 @@ export function ProjectForm({ initialData, clients }: ProjectFormProps) {
               size="small"
             >
               <MenuItem value="active">Activo</MenuItem>
-              <MenuItem value="paused">En Pausa</MenuItem>
+              <MenuItem value="on_hold">En Pausa</MenuItem>
               <MenuItem value="completed">Completado</MenuItem>
-              <MenuItem value="cancelled">Cancelado</MenuItem>
             </TextField>
           </Grid>
 
@@ -103,7 +102,7 @@ export function ProjectForm({ initialData, clients }: ProjectFormProps) {
               defaultValue={initialData?.due_date || ''}
               fullWidth
               size="small"
-              InputLabelProps={{ shrink: true }}
+              slotProps={{ inputLabel: { shrink: true } }}
             />
           </Grid>
 
@@ -140,4 +139,3 @@ export function ProjectForm({ initialData, clients }: ProjectFormProps) {
     </Paper>
   )
 }
-
