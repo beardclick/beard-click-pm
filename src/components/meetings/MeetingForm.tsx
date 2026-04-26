@@ -92,12 +92,14 @@ export function MeetingForm({ projects }: MeetingFormProps) {
               label="Enlace o Ubicación"
               placeholder="Ej: https://meet.google.com/xxx"
               fullWidth
-              InputProps={{
-                startAdornment: (
-                  <Box sx={{ mr: 1, color: 'text.secondary', display: 'flex' }}>
-                    <Video size={20} />
-                  </Box>
-                ),
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <Box sx={{ mr: 1, color: 'text.secondary', display: 'flex' }}>
+                      <Video size={20} />
+                    </Box>
+                  ),
+                }
               }}
             />
 
