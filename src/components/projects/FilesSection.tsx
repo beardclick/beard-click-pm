@@ -118,7 +118,7 @@ export function FilesSection({ projectId, initialFiles }: { projectId: string, i
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1, fontWeight: 700 }}>
           CONFIGURAR SUBIDA
         </Typography>
-        <Stack direction="row" spacing={2} alignItems="center">
+        <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
           <FormControl size="small" sx={{ minWidth: 150 }}>
             <InputLabel>Categoría</InputLabel>
             <Select
