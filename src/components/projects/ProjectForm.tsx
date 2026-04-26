@@ -42,7 +42,7 @@ export function ProjectForm({ initialData, clients }: ProjectFormProps) {
     <Paper variant="outlined" sx={{ p: 4, maxWidth: 700 }}>
       <form action={formAction}>
         <Grid container spacing={3}>
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <TextField
               id="name"
               name="name"
@@ -55,7 +55,7 @@ export function ProjectForm({ initialData, clients }: ProjectFormProps) {
             />
           </Grid>
           
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               id="client_id"
               name="client_id"
@@ -77,7 +77,7 @@ export function ProjectForm({ initialData, clients }: ProjectFormProps) {
             </TextField>
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               id="status"
               name="status"
@@ -93,7 +93,7 @@ export function ProjectForm({ initialData, clients }: ProjectFormProps) {
             </TextField>
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               id="due_date"
               name="due_date"
@@ -106,7 +106,7 @@ export function ProjectForm({ initialData, clients }: ProjectFormProps) {
             />
           </Grid>
 
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <TextField
               id="description"
               name="description"
