@@ -88,7 +88,7 @@ export default async function AdminProjectsPage() {
                           <Eye size={18} />
                         </IconButton>
                       </Link>
-                      <ProjectDeleteButton id={project.id} />
+                      <ProjectDeleteButton projectId={project.id} />
                     </Box>
                   </TableCell>
                 </TableRow>
