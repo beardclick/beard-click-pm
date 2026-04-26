@@ -35,7 +35,7 @@ export default async function AdminProjectsPage() {
     <Box>
       <AutoRead type="projects" />
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3, flexWrap: "wrap", gap: 2 }}>
-        <Typography variant="h5" fontWeight={700}>Proyectos</Typography>
+        <Typography variant="h5" sx={{fontWeight: 700}}>Proyectos</Typography>
         <Link href="/admin/projects/new" style={{ textDecoration: 'none' }}>
           <Button variant="contained" startIcon={<Plus size={18} />}>
             Nuevo Proyecto
@@ -60,7 +60,7 @@ export default async function AdminProjectsPage() {
               {projects.map((project) => (
                 <TableRow key={project.id} hover>
                   <TableCell>
-                    <Typography variant="body2" fontWeight={600}>{project.name}</Typography>
+                    <Typography variant="body2" sx={{fontWeight: 600}}>{project.name}</Typography>
                   </TableCell>
                   <TableCell>{project.clients?.name || "N/A"}</TableCell>
                   <TableCell>
@@ -76,7 +76,7 @@ export default async function AdminProjectsPage() {
                   <TableCell align="center">
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, color: project.files_count > 0 ? 'primary.main' : 'text.disabled' }}>
                       <FileText size={16} />
-                      <Typography variant="body2" fontWeight={project.files_count > 0 ? 700 : 400}>
+                      <Typography variant="body2" sx={{fontWeight: project.files_count > 0 ? 700 : 400}}>
                         {project.files_count}
                       </Typography>
                     </Box>
@@ -100,3 +100,4 @@ export default async function AdminProjectsPage() {
     </Box>
   );
 }
+

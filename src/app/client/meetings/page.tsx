@@ -21,7 +21,7 @@ export default async function ClientMeetingsPage() {
 
   return (
     <Box>
-      <Typography variant="h5" fontWeight={700} sx={{ mb: 3 }}>
+      <Typography variant="h5" sx={{ mb: 3 , fontWeight: 700}} >
         Mis Reuniones
       </Typography>
 
@@ -88,3 +88,4 @@ export default async function ClientMeetingsPage() {
     </Box>
   );
 }
+

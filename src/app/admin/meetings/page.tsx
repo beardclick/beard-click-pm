@@ -20,7 +20,7 @@ export default async function MeetingsPage() {
     <Box>
       <AutoRead type="meetings" />
       <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h5" fontWeight={700}>
+        <Typography variant="h5" sx={{fontWeight: 700}}>
           Reuniones Programadas
         </Typography>
         <Link href="/admin/meetings/new" style={{ textDecoration: 'none' }}>
@@ -48,7 +48,7 @@ export default async function MeetingsPage() {
               {meetings.length > 0 ? meetings.map((meeting) => (
                 <TableRow key={meeting.id} hover>
                   <TableCell>
-                    <Typography variant="body2" fontWeight={600}>
+                    <Typography variant="body2" sx={{fontWeight: 600}}>
                       {meeting.title}
                     </Typography>
                   </TableCell>
@@ -91,3 +91,4 @@ export default async function MeetingsPage() {
     </Box>
   );
 }
+

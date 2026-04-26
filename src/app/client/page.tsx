@@ -38,7 +38,7 @@ export default async function ClientDashboardPage() {
 
   return (
     <Box>
-      <Typography variant="h5" fontWeight={700} gutterBottom>
+      <Typography variant="h5" sx={{fontWeight: 700}} gutterBottom>
         Panel de Cliente
       </Typography>
 
@@ -46,10 +46,10 @@ export default async function ClientDashboardPage() {
         <Grid size={{ xs: 12, sm: 6 }}>
           <Card variant="outlined">
             <CardContent>
-              <Typography variant="body2" color="text.secondary" fontWeight={500}>
+              <Typography variant="body2" color="text.secondary" sx={{fontWeight: 500}}>
                 Mis Proyectos Activos
               </Typography>
-              <Typography variant="h3" fontWeight={700} sx={{ mt: 1, color: "primary.main" }}>
+              <Typography variant="h3" sx={{ mt: 1, color: "primary.main" , fontWeight: 700}} >
                 {stats.activeProjects}
               </Typography>
             </CardContent>
@@ -58,10 +58,10 @@ export default async function ClientDashboardPage() {
         <Grid size={{ xs: 12, sm: 6 }}>
           <Card variant="outlined">
             <CardContent>
-              <Typography variant="body2" color="text.secondary" fontWeight={500}>
+              <Typography variant="body2" color="text.secondary" sx={{fontWeight: 500}}>
                 Próximas Reuniones
               </Typography>
-              <Typography variant="h3" fontWeight={700} sx={{ mt: 1, color: "secondary.main" }}>
+              <Typography variant="h3" sx={{ mt: 1, color: "secondary.main" , fontWeight: 700}} >
                 {stats.upcomingMeetings}
               </Typography>
             </CardContent>
@@ -73,7 +73,7 @@ export default async function ClientDashboardPage() {
         <Grid size={{ xs: 12, md: 8 }}>
           <Card variant="outlined">
             <CardContent>
-              <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+              <Typography variant="h6" sx={{ mb: 2 , fontWeight: 600}} >
                 Actividad de mis Proyectos
               </Typography>
               <List sx={{ p: 0 }}>
@@ -96,7 +96,7 @@ export default async function ClientDashboardPage() {
                         </ListItemAvatar>
                         <ListItemText
                           primary={
-                            <Typography variant="subtitle2" fontWeight={700}>
+                            <Typography variant="subtitle2" sx={{fontWeight: 700}}>
                               {activity.title}
                             </Typography>
                           }
@@ -127,7 +127,7 @@ export default async function ClientDashboardPage() {
         <Grid size={{ xs: 12, md: 4 }}>
           <Card variant="outlined">
             <CardContent>
-              <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+              <Typography variant="h6" sx={{ mb: 2 , fontWeight: 600}} >
                 Agenda de Reuniones
               </Typography>
               <List sx={{ p: 0 }}>
@@ -137,7 +137,7 @@ export default async function ClientDashboardPage() {
                       <ListItem sx={{ px: 1, borderRadius: 2, '&:hover': { bgcolor: 'action.hover' } }}>
                         <ListItemText
                           primary={
-                            <Typography variant="subtitle2" fontWeight={700}>
+                            <Typography variant="subtitle2" sx={{fontWeight: 700}}>
                               {meeting.title}
                             </Typography>
                           }
@@ -166,3 +166,4 @@ export default async function ClientDashboardPage() {
     </Box>
   );
 }
+

@@ -20,7 +20,7 @@ export default async function AdminClientsPage() {
   return (
     <Box>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3, flexWrap: "wrap", gap: 2 }}>
-        <Typography variant="h5" fontWeight={700}>Clientes</Typography>
+        <Typography variant="h5" sx={{fontWeight: 700}}>Clientes</Typography>
         <Link href="/admin/clients/new" style={{ textDecoration: 'none' }}>
           <Button variant="contained" startIcon={<Plus size={18} />}>
             Nuevo Cliente
@@ -51,7 +51,7 @@ export default async function AdminClientsPage() {
               clients.map((client: any) => (
                 <TableRow key={client.id} hover>
                   <TableCell>
-                    <Typography variant="body2" fontWeight={500}>{client.name}</Typography>
+                    <Typography variant="body2" sx={{fontWeight: 500}}>{client.name}</Typography>
                     {client.company && (
                       <Typography variant="caption" color="text.secondary">{client.company}</Typography>
                     )}
@@ -81,3 +81,4 @@ export default async function AdminClientsPage() {
     </Box>
   );
 }
+

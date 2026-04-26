@@ -57,7 +57,7 @@ export default async function ClientProjectDetailPage({ params }: { params: { id
           <Card variant="outlined" sx={{ mb: 4 }}>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                <Typography variant="h4" fontWeight={700}>
+                <Typography variant="h4" sx={{fontWeight: 700}}>
                   {project.name}
                 </Typography>
                 <Chip label={currentStatus.label} color={currentStatus.color} variant="filled" />
@@ -74,7 +74,7 @@ export default async function ClientProjectDetailPage({ params }: { params: { id
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
                     <Calendar size={16} />
-                    <Typography variant="body2" fontWeight={500}>
+                    <Typography variant="body2" sx={{fontWeight: 500}}>
                       {project.due_date ? new Date(project.due_date).toLocaleDateString() : "No definida"}
                     </Typography>
                   </Box>
@@ -93,7 +93,7 @@ export default async function ClientProjectDetailPage({ params }: { params: { id
           {/* Sección de Reuniones */}
           <Card variant="outlined" sx={{ mt: 4 }}>
             <CardContent>
-              <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+              <Typography variant="h6" sx={{ mb: 2 , fontWeight: 600}}>
                 Nuestras Reuniones
               </Typography>
               
@@ -102,7 +102,7 @@ export default async function ClientProjectDetailPage({ params }: { params: { id
                   <Box key={meeting.id}>
                     <ListItem sx={{ px: 0, py: 1.5 }}>
                       <Box sx={{ flex: 1 }}>
-                        <Typography variant="subtitle2" fontWeight={700}>
+                        <Typography variant="subtitle2" sx={{fontWeight: 700}}>
                           {meeting.title}
                         </Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5, color: 'text.secondary' }}>

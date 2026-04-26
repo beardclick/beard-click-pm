@@ -40,7 +40,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <Box>
-      <Typography variant="h5" fontWeight={700} gutterBottom>
+      <Typography variant="h5" sx={{fontWeight: 700}} gutterBottom>
         Panel de Control
       </Typography>
 
@@ -52,10 +52,10 @@ export default async function AdminDashboardPage() {
               <CardContent>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <Box>
-                    <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                    <Typography variant="body2" color="text.secondary" sx={{fontWeight: 500}}>
                       {card.label}
                     </Typography>
-                    <Typography variant="h3" fontWeight={700} sx={{ mt: 1, color: card.color }}>
+                    <Typography variant="h3" sx={{ mt: 1, color: card.color , fontWeight: 700}} >
                       {card.value}
                     </Typography>
                   </Box>
@@ -75,7 +75,7 @@ export default async function AdminDashboardPage() {
         <Grid size={{ xs: 12, md: 8 }}>
           <Card variant="outlined">
             <CardContent>
-              <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+              <Typography variant="h6" sx={{ mb: 2 , fontWeight: 600}} >
                 Actividad Reciente
               </Typography>
               <List sx={{ p: 0 }}>
@@ -98,7 +98,7 @@ export default async function AdminDashboardPage() {
                         </ListItemAvatar>
                         <ListItemText
                           primary={
-                            <Typography variant="subtitle2" fontWeight={700}>
+                            <Typography variant="subtitle2" sx={{fontWeight: 700}}>
                               {activity.title}
                             </Typography>
                           }
@@ -130,7 +130,7 @@ export default async function AdminDashboardPage() {
         <Grid size={{ xs: 12, md: 4 }}>
           <Card variant="outlined">
             <CardContent>
-              <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+              <Typography variant="h6" sx={{ mb: 2 , fontWeight: 600}} >
                 Próximas Reuniones
               </Typography>
               <List sx={{ p: 0 }}>
@@ -140,7 +140,7 @@ export default async function AdminDashboardPage() {
                       <ListItem sx={{ px: 1, borderRadius: 2, '&:hover': { bgcolor: 'action.hover' } }}>
                         <ListItemText
                           primary={
-                            <Typography variant="subtitle2" fontWeight={700}>
+                            <Typography variant="subtitle2" sx={{fontWeight: 700}}>
                               {meeting.title}
                             </Typography>
                           }
@@ -169,3 +169,4 @@ export default async function AdminDashboardPage() {
     </Box>
   );
 }
+

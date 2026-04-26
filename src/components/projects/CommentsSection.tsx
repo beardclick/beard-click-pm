@@ -50,7 +50,7 @@ export function CommentsSection({ projectId, initialComments }: CommentsSectionP
 
   return (
     <Box sx={{ mt: 4 }}>
-      <Typography variant="h6" fontWeight={600} gutterBottom>
+      <Typography variant="h6" sx={{fontWeight: 600}} gutterBottom>
         Comentarios y Feedback
       </Typography>
 
@@ -64,7 +64,7 @@ export function CommentsSection({ projectId, initialComments }: CommentsSectionP
                 </Avatar>
                 <Box sx={{ flex: 1 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                    <Typography variant="subtitle2" fontWeight={600}>
+                    <Typography variant="subtitle2" sx={{fontWeight: 600}}>
                       {comment.profiles.full_name}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
@@ -110,3 +110,4 @@ export function CommentsSection({ projectId, initialComments }: CommentsSectionP
     </Box>
   )
 }
+

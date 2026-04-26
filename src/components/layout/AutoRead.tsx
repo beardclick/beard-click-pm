@@ -10,3 +10,4 @@ export function AutoRead({ type }: { type: 'projects' | 'meetings' | 'comments' 
 
   return null;
 }
+

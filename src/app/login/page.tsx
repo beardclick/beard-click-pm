@@ -23,7 +23,7 @@ export default function LoginPage() {
     <Box sx={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", bgcolor: "background.default", p: 2 }}>
       <Paper variant="outlined" sx={{ width: "100%", maxWidth: 420, p: 5 }}>
         <Box sx={{ textAlign: "center", mb: 4 }}>
-          <Typography variant="h5" fontWeight={700} color="primary">
+          <Typography variant="h5" sx={{fontWeight: 700}} color="primary">
             Beard Click
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
@@ -74,3 +74,4 @@ export default function LoginPage() {
     </Box>
   )
 }
+

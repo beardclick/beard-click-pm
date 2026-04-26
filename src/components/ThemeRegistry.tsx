@@ -12,3 +12,4 @@ export function ThemeRegistry({ children }: { children: React.ReactNode }) {
     </ThemeProvider>
   );
 }
+

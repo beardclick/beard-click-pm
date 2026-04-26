@@ -28,3 +28,4 @@ export function ProjectDeleteButton({ projectId }: { projectId: string }) {
     </Button>
   )
 }
+

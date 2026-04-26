@@ -66,7 +66,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
           <Card variant="outlined" sx={{ mb: 4 }}>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                <Typography variant="h4" fontWeight={700}>
+                <Typography variant="h4" sx={{fontWeight: 700}}>
                   {project.name}
                 </Typography>
                 <Chip label={currentStatus.label} color={currentStatus.color} variant="filled" />
@@ -83,7 +83,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
                     <Calendar size={16} />
-                    <Typography variant="body2" fontWeight={500}>
+                    <Typography variant="body2" sx={{fontWeight: 500}}>
                       {project.due_date ? new Date(project.due_date).toLocaleDateString() : "No definida"}
                     </Typography>
                   </Box>
@@ -92,7 +92,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
                   <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontWeight: 700 }}>
                     CLIENTE
                   </Typography>
-                  <Typography variant="body2" fontWeight={500} sx={{ mt: 0.5 }}>
+                  <Typography variant="body2" sx={{ mt: 0.5 , fontWeight: 500}}>
                     {project.clients?.name || "Sin cliente asignado"}
                   </Typography>
                 </Box>
@@ -112,7 +112,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
           <Card variant="outlined" sx={{ mt: 4 }}>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6" fontWeight={600}>
+                <Typography variant="h6" sx={{fontWeight: 600}}>
                   Reuniones
                 </Typography>
                 <Link href="/admin/meetings/new" style={{ textDecoration: 'none' }}>
@@ -127,7 +127,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
                   <Box key={meeting.id}>
                     <ListItem sx={{ px: 0, py: 1.5 }}>
                       <Box sx={{ flex: 1 }}>
-                        <Typography variant="subtitle2" fontWeight={700}>
+                        <Typography variant="subtitle2" sx={{fontWeight: 700}}>
                           {meeting.title}
                         </Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5, color: 'text.secondary' }}>

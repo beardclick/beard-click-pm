@@ -19,7 +19,7 @@ export default async function NewProjectPage() {
           </IconButton>
         </Link>
         <Box>
-          <Typography variant="h5" fontWeight={700}>Crear Nuevo Proyecto</Typography>
+          <Typography variant="h5" sx={{fontWeight: 700}}>Crear Nuevo Proyecto</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             Ingresa los detalles para abrir un nuevo proyecto en el sistema.
           </Typography>
@@ -30,3 +30,4 @@ export default async function NewProjectPage() {
     </Box>
   );
 }
+

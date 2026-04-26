@@ -23,7 +23,7 @@ export default async function ClientCommentsPage() {
 
   return (
     <Box>
-      <Typography variant="h5" fontWeight={700} gutterBottom>
+      <Typography variant="h5" sx={{fontWeight: 700}} gutterBottom>
         Feed de Comentarios
       </Typography>
 
@@ -47,7 +47,7 @@ export default async function ClientCommentsPage() {
                   <ListItemText
                     primary={
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Typography variant="subtitle2" fontWeight={700}>
+                        <Typography variant="subtitle2" sx={{fontWeight: 700}}>
                           {comment.profiles?.full_name}
                         </Typography>
                         <Chip size="small" label={comment.projects?.name} sx={{ fontSize: '0.65rem' }} />
@@ -86,3 +86,4 @@ export default async function ClientCommentsPage() {
     </Box>
   );
 }
+

@@ -15,7 +15,7 @@ export default function NewClientPage() {
           </IconButton>
         </Link>
         <Box>
-          <Typography variant="h5" fontWeight={700}>Añadir Nuevo Cliente</Typography>
+          <Typography variant="h5" sx={{fontWeight: 700}}>Añadir Nuevo Cliente</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             Ingresa los datos para registrar una nueva empresa o cliente en el sistema.
           </Typography>
@@ -26,3 +26,4 @@ export default function NewClientPage() {
     </Box>
   );
 }
+

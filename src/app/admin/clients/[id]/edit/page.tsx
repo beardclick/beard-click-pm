@@ -24,7 +24,7 @@ export default async function EditClientPage({ params }: { params: Promise<{ id:
           </IconButton>
         </Link>
         <Box>
-          <Typography variant="h5" fontWeight={700}>Editar Cliente</Typography>
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>Editar Cliente</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             Modifica la información registrada de la empresa o cliente.
           </Typography>

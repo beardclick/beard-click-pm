@@ -31,7 +31,7 @@ export default async function ClientProjectsPage() {
   return (
     <Box>
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h5" fontWeight={700}>Mis Proyectos</Typography>
+        <Typography variant="h5" sx={{fontWeight: 700}}>Mis Proyectos</Typography>
         <Typography variant="body2" color="text.secondary">
           Aquí puedes ver el estado y archivos de todos tus proyectos activos.
         </Typography>
@@ -53,7 +53,7 @@ export default async function ClientProjectsPage() {
               {projects.map((project) => (
                 <TableRow key={project.id} hover>
                   <TableCell>
-                    <Typography variant="body2" fontWeight={600}>{project.name}</Typography>
+                    <Typography variant="body2" sx={{fontWeight: 600}}>{project.name}</Typography>
                   </TableCell>
                   <TableCell>
                     <Chip 
@@ -68,7 +68,7 @@ export default async function ClientProjectsPage() {
                   <TableCell align="center">
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, color: project.files_count > 0 ? 'primary.main' : 'text.disabled' }}>
                       <FileText size={16} />
-                      <Typography variant="body2" fontWeight={project.files_count > 0 ? 700 : 400}>
+                      <Typography variant="body2" sx={{fontWeight: project.files_count > 0 ? 700 : 400}}>
                         {project.files_count}
                       </Typography>
                     </Box>
@@ -98,3 +98,4 @@ export default async function ClientProjectsPage() {
     </Box>
   );
 }
+

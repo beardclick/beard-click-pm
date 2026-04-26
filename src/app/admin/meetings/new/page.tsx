@@ -8,7 +8,7 @@ export default async function NewMeetingPage() {
 
   return (
     <Box sx={{ maxWidth: 600, mx: "auto" }}>
-      <Typography variant="h5" fontWeight={700} gutterBottom sx={{ mb: 3 }}>
+      <Typography variant="h5" sx={{ mb: 3 , fontWeight: 700}} gutterBottom >
         Agendar Nueva Reunión
       </Typography>
       
@@ -16,3 +16,4 @@ export default async function NewMeetingPage() {
     </Box>
   );
 }
+
