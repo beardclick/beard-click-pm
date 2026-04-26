@@ -13,7 +13,7 @@ import { Eye, FileText } from "lucide-react";
 import Chip from "@mui/material/Chip";
 import { getProjects } from "@/app/actions/projects";
 
-const statusColor: Record<string, "success" | "warning" | "default" | "error"> = {
+const statusColor: Record<string, "success" | "warning" | "default" | "error" | "primary"> = {
   "active": "success",
   "completed": "primary",
   "on_hold": "warning"

@@ -16,7 +16,7 @@ import { getProjects } from "@/app/actions/projects";
 import { ProjectDeleteButton } from "@/components/projects/ProjectDeleteButton";
 import { AutoRead } from "@/components/layout/AutoRead";
 
-const statusColor: Record<string, "success" | "warning" | "default" | "error"> = {
+const statusColor: Record<string, "success" | "warning" | "default" | "error" | "primary"> = {
   "active": "success",
   "completed": "primary",
   "on_hold": "warning"
