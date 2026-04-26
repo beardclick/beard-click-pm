@@ -58,7 +58,7 @@ export default function AdminCalendarPage() {
 
   return (
     <Box sx={{ height: "calc(100vh - 140px)" }}>
-      <Typography variant="h5" fontWeight={700} sx={{ mb: 3 }}>
+      <Typography variant="h5" sx={{ mb: 3, fontWeight: 700 }}>
         Calendario de Reuniones
       </Typography>
       
@@ -102,10 +102,10 @@ export default function AdminCalendarPage() {
           {selectedEvent && (
             <Stack spacing={2.5} sx={{ py: 1 }}>
               <Box>
-                <Typography variant="overline" color="primary" fontWeight={700}>
+                <Typography variant="overline" color="primary" sx={{ fontWeight: 700 }}>
                   PROYECTO: {selectedEvent.projects?.name}
                 </Typography>
-                <Typography variant="h6" fontWeight={700}>
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>
                   {selectedEvent.title}
                 </Typography>
               </Box>
@@ -113,7 +113,7 @@ export default function AdminCalendarPage() {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <Clock size={20} color="#64748b" />
                 <Box>
-                  <Typography variant="body2" fontWeight={600}>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
                     {dayjs(selectedEvent.starts_at).format('dddd, D [de] MMMM [de] YYYY')}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
