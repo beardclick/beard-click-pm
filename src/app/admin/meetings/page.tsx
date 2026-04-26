@@ -14,7 +14,9 @@ import { getMeetings } from "@/app/actions/meetings";
 import { AutoRead } from "@/components/layout/AutoRead";
 
 export default async function MeetingsPage() {
-  const meetings = await getMeetings();
+  const meetingsData = await getMeetings();
+  // Nos aseguramos de que siempre sea un array
+  const meetings = meetingsData || [];
 
   return (
     <Box>
@@ -45,7 +47,7 @@ export default async function MeetingsPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {meetings && meetings.length > 0 ? meetings.map((meeting) => (
+              {meetings.length > 0 ? meetings.map((meeting) => (
                 <TableRow key={meeting.id} hover>
                   <TableCell>
                     <Typography variant="body2" sx={{fontWeight: 600}}>
@@ -91,4 +93,3 @@ export default async function MeetingsPage() {
     </Box>
   );
 }
-
