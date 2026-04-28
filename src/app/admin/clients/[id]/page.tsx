@@ -10,6 +10,7 @@ import Chip from "@mui/material/Chip";
 import Grid from "@mui/material/Grid";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
 import { notFound } from "next/navigation";
@@ -70,7 +71,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2, mb: 3, flexWrap: "wrap" }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <Link href="/admin/clients">
-            <IconButton sx={{ color: "text.secondary" }}>
+            <IconButton component="span" sx={{ color: "text.secondary" }}>
               <ChevronLeft size={22} />
             </IconButton>
           </Link>
@@ -85,7 +86,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
         </Box>
 
         <Link href={`/admin/clients/${client.id}/edit`} style={{ textDecoration: "none" }}>
-          <Button variant="outlined" startIcon={<Edit size={18} />}>
+          <Button component="span" variant="outlined" startIcon={<Edit size={18} />}>
             Editar Cliente
           </Button>
         </Link>
@@ -152,16 +153,19 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                 <List disablePadding>
                   {projects.map((project: any, index: number) => (
                     <Box key={project.id}>
-                      <ListItem
-                        component={Link}
-                        href={`/admin/projects/${project.id}`}
-                        sx={{ px: 0, color: "inherit" }}
-                      >
-                        <ListItemText
-                          primary={project.name}
-                          secondary={project.description || "Sin descripción"}
-                        />
-                        <Chip size="small" label={project.status} />
+                      <ListItem disablePadding>
+                        <Link
+                          href={`/admin/projects/${project.id}`}
+                          style={{ width: "100%", color: "inherit", textDecoration: "none" }}
+                        >
+                          <ListItemButton component="div" sx={{ px: 0 }}>
+                            <ListItemText
+                              primary={project.name}
+                              secondary={project.description || "Sin descripción"}
+                            />
+                            <Chip size="small" label={project.status} />
+                          </ListItemButton>
+                        </Link>
                       </ListItem>
                       {index < projects.length - 1 && <Divider />}
                     </Box>

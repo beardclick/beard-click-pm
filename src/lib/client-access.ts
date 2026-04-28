@@ -12,6 +12,16 @@ export async function getCurrentClientRecord() {
     return null
   }
 
+  const { data: profile, error: profileError } = await adminSupabase
+    .from('profiles')
+    .select('id, role')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  if (profileError || profile?.role !== 'client') {
+    return null
+  }
+
   const normalizedEmail = user.email.trim().toLowerCase()
 
   const { data: client, error } = await adminSupabase
@@ -23,6 +33,27 @@ export async function getCurrentClientRecord() {
 
   if (error || !client) {
     return null
+  }
+
+  if (client.profile_id !== user.id) {
+    const { data: syncedClient, error: syncError } = await adminSupabase
+      .from('clients')
+      .update({
+        profile_id: user.id,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', client.id)
+      .select('*')
+      .maybeSingle()
+
+    if (syncError) {
+      console.error('Error syncing client profile link:', syncError)
+      return client
+    }
+
+    if (syncedClient) {
+      return syncedClient
+    }
   }
 
   return client

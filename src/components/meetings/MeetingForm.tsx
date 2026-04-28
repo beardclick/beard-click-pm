@@ -15,6 +15,7 @@ import { notifyAppCountsChanged } from '@/lib/client-events'
 import { Video, Save, X } from 'lucide-react'
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
 import dayjs, { Dayjs } from 'dayjs'
+import { MeetingDeleteButton } from './MeetingDeleteButton'
 
 interface Project {
   id: string
@@ -151,6 +152,13 @@ export function MeetingForm({ projects, initialData }: MeetingFormProps) {
             )}
 
             <Box sx={{ display: 'flex', gap: 2, pt: 2 }}>
+              {initialData && (
+                <MeetingDeleteButton
+                  meetingId={initialData.id}
+                  redirectTo="/admin/meetings"
+                  fullWidth
+                />
+              )}
               <Button
                 variant="outlined"
                 fullWidth

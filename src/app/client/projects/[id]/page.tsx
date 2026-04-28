@@ -5,7 +5,6 @@ import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
 import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
-import Link from "next/link";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
@@ -19,6 +18,7 @@ import { CommentsSection } from "@/components/projects/CommentsSection";
 import { FilesSection } from "@/components/projects/FilesSection";
 import { notFound } from "next/navigation";
 import { formatDateOnly, formatDateTime } from "@/lib/date-utils";
+import AppLink from "@/components/ui/AppLink";
 
 export default async function ClientProjectDetailPage({ params }: { params: { id: string } }) {
   const { id } = await params;
@@ -43,14 +43,9 @@ export default async function ClientProjectDetailPage({ params }: { params: { id
   return (
     <Box>
       <Box sx={{ mb: 3 }}>
-        <Link href="/client/projects" style={{ textDecoration: 'none' }}>
-          <Button 
-            startIcon={<ArrowLeft size={18} />}
-            variant="text"
-          >
-            Volver a mis Proyectos
-          </Button>
-        </Link>
+        <Button component={AppLink} href="/client/projects" startIcon={<ArrowLeft size={18} />} variant="text">
+          Volver a mis Proyectos
+        </Button>
       </Box>
 
       <Grid container spacing={4}>

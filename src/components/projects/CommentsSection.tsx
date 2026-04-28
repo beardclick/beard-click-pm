@@ -39,6 +39,7 @@ export function CommentsSection({ projectId, initialComments }: CommentsSectionP
   const [newComment, setNewComment] = useState('')
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
+  const [submitError, setSubmitError] = useState('')
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [currentUserProfile, setCurrentUserProfile] = useState<Comment['profiles'] | null>(null)
 
@@ -74,6 +75,7 @@ export function CommentsSection({ projectId, initialComments }: CommentsSectionP
     if (!newComment.trim() || loading) return
 
     setLoading(true)
+    setSubmitError('')
     const result = await createCommentAction(projectId, newComment)
     
     if (result.success) {
@@ -87,6 +89,8 @@ export function CommentsSection({ projectId, initialComments }: CommentsSectionP
       ])
       setOpen(false)
       notifyAppCountsChanged()
+    } else if (result.error) {
+      setSubmitError(result.error)
     }
     setLoading(false)
   }
@@ -169,6 +173,8 @@ export function CommentsSection({ projectId, initialComments }: CommentsSectionP
               variant="outlined"
               sx={{ mb: 2 }}
               autoFocus
+              error={Boolean(submitError)}
+              helperText={submitError || ' '}
             />
             <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
               <Button

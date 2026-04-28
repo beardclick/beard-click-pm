@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useContext, useMemo, useState } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { AppThemeMode, getAppTheme } from '@/lib/theme';
@@ -29,19 +29,19 @@ export function useThemeMode() {
 }
 
 export function ThemeRegistry({ children }: { children: React.ReactNode }) {
-  const [mode, setMode] = useState<AppThemeMode>('light');
+  const [mode, setMode] = useState<AppThemeMode>(() => {
+    if (typeof window === 'undefined') {
+      return 'light';
+    }
 
-  useEffect(() => {
     const savedMode = window.localStorage.getItem(STORAGE_KEY) as AppThemeMode | null;
 
     if (savedMode === 'light' || savedMode === 'dark') {
-      setMode(savedMode);
-      return;
+      return savedMode;
     }
 
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    setMode(prefersDark ? 'dark' : 'light');
-  }, []);
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  });
 
   const theme = useMemo(() => getAppTheme(mode), [mode]);
 

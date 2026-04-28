@@ -5,7 +5,6 @@ import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
 import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
-import Link from "next/link";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
@@ -20,6 +19,7 @@ import { FilesSection } from "@/components/projects/FilesSection";
 import { WebMaintenanceSection } from "@/components/projects/WebMaintenanceSection";
 import { notFound } from "next/navigation";
 import { formatDateOnly, formatDateTime } from "@/lib/date-utils";
+import AppLink from "@/components/ui/AppLink";
 
 export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
   const { id } = await params;
@@ -46,22 +46,12 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
   return (
     <Box>
       <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Link href="/admin/projects" style={{ textDecoration: 'none' }}>
-          <Button 
-            startIcon={<ArrowLeft size={18} />}
-            variant="text"
-          >
-            Volver a Proyectos
-          </Button>
-        </Link>
-        <Link href={`/admin/projects/${id}/edit`} style={{ textDecoration: 'none' }}>
-          <Button 
-            startIcon={<Edit size={18} />}
-            variant="outlined"
-          >
-            Editar Proyecto
-          </Button>
-        </Link>
+        <Button component={AppLink} href="/admin/projects" startIcon={<ArrowLeft size={18} />} variant="text">
+          Volver a Proyectos
+        </Button>
+        <Button component={AppLink} href={`/admin/projects/${id}/edit`} startIcon={<Edit size={18} />} variant="outlined">
+          Editar Proyecto
+        </Button>
       </Box>
 
       <Grid container spacing={4}>
@@ -138,11 +128,9 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
                 <Typography variant="h6" sx={{fontWeight: 600}}>
                   Reuniones
                 </Typography>
-                <Link href="/admin/meetings/new" style={{ textDecoration: 'none' }}>
-                  <Button size="small" variant="text" startIcon={<Calendar size={16} />}>
-                    Agendar
-                  </Button>
-                </Link>
+                <Button component={AppLink} href="/admin/meetings/new" size="small" variant="text" startIcon={<Calendar size={16} />}>
+                  Agendar
+                </Button>
               </Box>
               
               {(() => {

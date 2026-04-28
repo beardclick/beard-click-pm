@@ -7,6 +7,7 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
@@ -84,49 +85,52 @@ export function GlobalCommentsList({ initialComments }: GlobalCommentsListProps)
           <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
             {filteredAndSortedComments.length > 0 ? filteredAndSortedComments.map((comment, index) => (
               <Box key={comment.id}>
-                <Link href={`/admin/projects/${comment.project_id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                  <ListItem 
-                    alignItems="flex-start"
-                    sx={{ 
+                <ListItem disablePadding>
+                  <ListItemButton
+                    component={Link}
+                    href={`/admin/projects/${comment.project_id}`}
+                    sx={{
+                      alignItems: 'flex-start',
+                      color: 'inherit',
                       '&:hover': { bgcolor: 'action.hover' },
                       transition: 'background-color 0.2s'
                     }}
                   >
-                  <ListItemAvatar>
-                    <Avatar alt={comment.profiles?.full_name} src={comment.profiles?.avatar_url}>
-                      {comment.profiles?.full_name?.[0]}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                        <Typography variant="subtitle2" sx={{fontWeight: 700}}>
-                          {comment.profiles?.full_name}
-                        </Typography>
-                        <Chip size="small" label={comment.projects?.name} sx={{ fontSize: '0.65rem', fontWeight: 600 }} variant="outlined" />
-                      </Box>
-                    }
-                    secondary={
-                      <>
-                        <Typography
-                          component="span"
-                          variant="body2"
-                          color="text.primary"
-                          sx={{ display: 'block', mb: 1 }}
-                        >
-                          {comment.content}
-                        </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary' }}>
-                          <Clock size={12} />
-                          <Typography variant="caption">
-                            {formatDateTime(comment.created_at)}
+                    <ListItemAvatar>
+                      <Avatar alt={comment.profiles?.full_name} src={comment.profiles?.avatar_url}>
+                        {comment.profiles?.full_name?.[0]}
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                          <Typography variant="subtitle2" sx={{fontWeight: 700}}>
+                            {comment.profiles?.full_name}
                           </Typography>
+                          <Chip size="small" label={comment.projects?.name} sx={{ fontSize: '0.65rem', fontWeight: 600 }} variant="outlined" />
                         </Box>
-                      </>
-                    }
-                  />
+                      }
+                      secondary={
+                        <>
+                          <Typography
+                            component="span"
+                            variant="body2"
+                            color="text.primary"
+                            sx={{ display: 'block', mb: 1 }}
+                          >
+                            {comment.content}
+                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary' }}>
+                            <Clock size={12} />
+                            <Typography variant="caption">
+                              {formatDateTime(comment.created_at)}
+                            </Typography>
+                          </Box>
+                        </>
+                      }
+                    />
+                  </ListItemButton>
                 </ListItem>
-              </Link>
                 {index < filteredAndSortedComments.length - 1 && <Divider variant="inset" component="li" />}
               </Box>
             )) : (

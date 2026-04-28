@@ -278,11 +278,14 @@ export function ProjectsList({ initialProjects, isAdmin = true }: ProjectsListPr
                     </TableCell>
                     <TableCell align="right">
                       <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
-                        <Link href={isAdmin ? `/admin/projects/${project.id}` : `/client/projects/${project.id}`}>
-                          <IconButton size="small" color="primary">
-                            <Eye size={18} />
-                          </IconButton>
-                        </Link>
+                        <IconButton
+                          component={Link}
+                          href={isAdmin ? `/admin/projects/${project.id}` : `/client/projects/${project.id}`}
+                          size="small"
+                          color="primary"
+                        >
+                          <Eye size={18} />
+                        </IconButton>
                         {isAdmin && <ProjectDeleteButton projectId={project.id} />}
                       </Box>
                     </TableCell>

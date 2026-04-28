@@ -132,6 +132,20 @@ async function provisionClientPortalAccess(
     return { error: 'No se pudo crear o actualizar el perfil del cliente.' }
   }
 
+  const { error: clientLinkError } = await adminSupabase
+    .from('clients')
+    .update({
+      profile_id: authUserId,
+      email: normalizedEmail,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', client.id)
+
+  if (clientLinkError) {
+    console.error('Error linking client to portal profile:', clientLinkError)
+    return { error: 'No se pudo vincular el cliente con su acceso al portal.' }
+  }
+
   if (!canSendTransactionalEmail()) {
     return {
       error: 'Brevo no esta configurado. Define BREVO_API_KEY y PORTAL_EMAIL_FROM para enviar accesos.',

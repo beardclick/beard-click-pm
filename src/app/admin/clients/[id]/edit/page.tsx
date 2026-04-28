@@ -1,7 +1,7 @@
 import { getClient } from "@/app/actions/clients";
 import { ClientForm } from "@/components/clients/ClientForm";
+import AppLink from "@/components/ui/AppLink";
 import { ChevronLeft } from "lucide-react";
-import Link from "next/link";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
@@ -18,11 +18,9 @@ export default async function EditClientPage({ params }: { params: Promise<{ id:
   return (
     <Box>
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
-        <Link href="/admin/clients">
-          <IconButton sx={{ color: "text.secondary" }}>
-            <ChevronLeft size={22} />
-          </IconButton>
-        </Link>
+        <IconButton component={AppLink} href="/admin/clients" sx={{ color: "text.secondary" }}>
+          <ChevronLeft size={22} />
+        </IconButton>
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 700 }}>Editar Cliente</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>

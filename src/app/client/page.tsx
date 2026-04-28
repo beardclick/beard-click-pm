@@ -5,11 +5,11 @@ import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
 import Divider from "@mui/material/Divider";
-import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { 
   getClientDashboardStats, 
@@ -18,6 +18,7 @@ import {
 } from "@/app/actions/dashboard";
 import { getCurrentClientRecord } from "@/lib/client-access";
 import { formatDate, formatDateTime } from "@/lib/date-utils";
+import AppLink from "@/components/ui/AppLink";
 
 export default async function ClientDashboardPage() {
   const client = await getCurrentClientRecord();
@@ -79,14 +80,17 @@ export default async function ClientDashboardPage() {
               <List sx={{ p: 0 }}>
                 {activities.length > 0 ? activities.map((activity, index) => (
                   <Box key={activity.id}>
-                    <Link href={getActivityLink(activity)} style={{ textDecoration: 'none', color: 'inherit' }}>
-                      <ListItem 
-                        alignItems="flex-start" 
-                        sx={{ 
-                          px: 1, 
-                          py: 1.5, 
+                    <ListItem disablePadding>
+                      <ListItemButton
+                        component={AppLink}
+                        href={getActivityLink(activity)}
+                        sx={{
+                          px: 1,
+                          py: 1.5,
                           borderRadius: 2,
-                          '&:hover': { bgcolor: 'action.hover' } 
+                          alignItems: 'flex-start',
+                          color: 'inherit',
+                          '&:hover': { bgcolor: 'action.hover' }
                         }}
                       >
                         <ListItemAvatar>
@@ -110,8 +114,8 @@ export default async function ClientDashboardPage() {
                           }
                         />
                         <ChevronRight size={18} style={{ alignSelf: 'center', opacity: 0.3 }} />
-                      </ListItem>
-                    </Link>
+                      </ListItemButton>
+                    </ListItem>
                     {index < activities.length - 1 && <Divider component="li" />}
                   </Box>
                 )) : (
@@ -133,8 +137,12 @@ export default async function ClientDashboardPage() {
               <List sx={{ p: 0 }}>
                 {meetings.length > 0 ? meetings.map((meeting, index) => (
                   <Box key={meeting.id}>
-                    <Link href="/client/meetings" style={{ textDecoration: 'none', color: 'inherit' }}>
-                      <ListItem sx={{ px: 1, borderRadius: 2, '&:hover': { bgcolor: 'action.hover' } }}>
+                    <ListItem disablePadding>
+                      <ListItemButton
+                        component={AppLink}
+                        href="/client/meetings"
+                        sx={{ px: 1, borderRadius: 2, color: 'inherit', '&:hover': { bgcolor: 'action.hover' } }}
+                      >
                         <ListItemText
                           primary={
                             <Typography variant="subtitle2" sx={{fontWeight: 700}}>
@@ -149,8 +157,8 @@ export default async function ClientDashboardPage() {
                           }
                         />
                         <ChevronRight size={16} style={{ opacity: 0.3 }} />
-                      </ListItem>
-                    </Link>
+                      </ListItemButton>
+                    </ListItem>
                     {index < meetings.length - 1 && <Divider component="li" />}
                   </Box>
                 )) : (

@@ -167,11 +167,15 @@ export function ClientsList({ initialClients }: ClientsListProps) {
                   <TableCell sx={{ minWidth: { xs: 220, sm: 280 } }}>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
                       <Typography variant="body2" sx={{fontWeight: 600}}>{client.name}</Typography>
-                      <Link href={`/admin/clients/${client.id}`} style={{ textDecoration: 'none' }}>
-                        <Button size="small" variant="outlined" startIcon={<Eye size={16} />}>
-                          Ver
-                        </Button>
-                      </Link>
+                      <Button
+                        component={Link}
+                        href={`/admin/clients/${client.id}`}
+                        size="small"
+                        variant="outlined"
+                        startIcon={<Eye size={16} />}
+                      >
+                        Ver
+                      </Button>
                     </Box>
                     {client.company && (
                       <Typography variant="caption" color="text.secondary">{client.company}</Typography>
@@ -193,11 +197,15 @@ export function ClientsList({ initialClients }: ClientsListProps) {
                   </TableCell>
                   <TableCell align="right">
                     <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
-                      <Link href={`/admin/clients/${client.id}/edit`} style={{ textDecoration: 'none' }}>
-                        <Button size="small" variant="text" startIcon={<Edit size={16} />}>
-                          Editar
-                        </Button>
-                      </Link>
+                      <Button
+                        component={Link}
+                        href={`/admin/clients/${client.id}/edit`}
+                        size="small"
+                        variant="text"
+                        startIcon={<Edit size={16} />}
+                      >
+                        Editar
+                      </Button>
                       <ClientPortalAccessButton clientId={client.id} hasPortalAccess={Boolean(client.hasPortalAccess)} />
                       <ClientDeleteButton clientId={client.id} />
                     </Box>

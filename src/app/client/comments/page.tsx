@@ -4,6 +4,7 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
@@ -33,45 +34,51 @@ export default async function ClientCommentsPage() {
           <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
             {comments.length > 0 ? comments.map((comment, index) => (
               <Box key={comment.id}>
-                <Link href={`/client/projects/${comment.project_id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                  <ListItem 
-                    alignItems="flex-start"
-                    sx={{ 
-                      '&:hover': { bgcolor: 'action.hover' }
-                    }}
+                <ListItem disablePadding>
+                  <Link
+                    href={`/client/projects/${comment.project_id}`}
+                    style={{ width: '100%', textDecoration: 'none', color: 'inherit' }}
                   >
-                  <ListItemAvatar>
-                    <Avatar alt={comment.profiles?.full_name} src={comment.profiles?.avatar_url}>
-                      {comment.profiles?.full_name?.[0]}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Typography variant="subtitle2" sx={{fontWeight: 700}}>
-                          {comment.profiles?.full_name}
-                        </Typography>
-                        <Chip size="small" label={comment.projects?.name} sx={{ fontSize: '0.65rem' }} />
-                      </Box>
-                    }
-                    secondary={
-                      <>
-                        <Typography
-                          component="span"
-                          variant="body2"
-                          color="text.primary"
-                          sx={{ display: 'block', mt: 0.5 }}
-                        >
-                          {comment.content}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {formatDateTime(comment.created_at)}
-                        </Typography>
-                      </>
-                    }
-                  />
+                    <ListItemButton
+                      component="div"
+                      alignItems="flex-start"
+                      sx={{
+                        '&:hover': { bgcolor: 'action.hover' }
+                      }}
+                    >
+                      <ListItemAvatar>
+                        <Avatar alt={comment.profiles?.full_name} src={comment.profiles?.avatar_url}>
+                          {comment.profiles?.full_name?.[0]}
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography variant="subtitle2" sx={{fontWeight: 700}}>
+                              {comment.profiles?.full_name}
+                            </Typography>
+                            <Chip size="small" label={comment.projects?.name} sx={{ fontSize: '0.65rem' }} />
+                          </Box>
+                        }
+                        secondary={
+                          <>
+                            <Typography
+                              component="span"
+                              variant="body2"
+                              color="text.primary"
+                              sx={{ display: 'block', mt: 0.5 }}
+                            >
+                              {comment.content}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {formatDateTime(comment.created_at)}
+                            </Typography>
+                          </>
+                        }
+                      />
+                    </ListItemButton>
+                  </Link>
                 </ListItem>
-              </Link>
                 {index < comments.length - 1 && <Divider variant="inset" component="li" />}
               </Box>
             )) : (
@@ -79,9 +86,11 @@ export default async function ClientCommentsPage() {
                 <Typography variant="body1" color="text.secondary">
                   No hay comentarios en tus proyectos aún.
                 </Typography>
-                <Button component={Link} href="/client/projects" variant="outlined" sx={{ mt: 2 }}>
-                  Ir a mis proyectos
-                </Button>
+                <Link href="/client/projects" style={{ textDecoration: 'none' }}>
+                  <Button component="span" variant="outlined" sx={{ mt: 2 }}>
+                    Ir a mis proyectos
+                  </Button>
+                </Link>
               </Box>
             )}
           </List>

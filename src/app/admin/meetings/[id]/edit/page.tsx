@@ -2,11 +2,11 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import { ChevronLeft } from "lucide-react";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getMeeting } from "@/app/actions/meetings";
 import { getProjects } from "@/app/actions/projects";
 import { MeetingForm } from "@/components/meetings/MeetingForm";
+import AppLink from "@/components/ui/AppLink";
 
 export default async function EditMeetingPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
@@ -22,11 +22,9 @@ export default async function EditMeetingPage({ params }: { params: Promise<{ id
   return (
     <Box>
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
-        <Link href="/admin/meetings">
-          <IconButton sx={{ color: "text.secondary" }}>
-            <ChevronLeft size={22} />
-          </IconButton>
-        </Link>
+        <IconButton component={AppLink} href="/admin/meetings" sx={{ color: "text.secondary" }}>
+          <ChevronLeft size={22} />
+        </IconButton>
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 700 }}>
             Editar Reunión

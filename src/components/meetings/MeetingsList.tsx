@@ -131,11 +131,15 @@ function MeetingsTable({ meetings, sortField, sortOrder, handleSort, isAdmin }: 
               </TableCell>
               <TableCell align="right">
                 {isAdmin ? (
-                  <Link href={`/admin/meetings/${meeting.id}/edit`} style={{ textDecoration: "none" }}>
-                    <Button size="small" variant="outlined" startIcon={<Edit size={16} />}>
-                      Editar
-                    </Button>
-                  </Link>
+                  <Button
+                    component={Link}
+                    href={`/admin/meetings/${meeting.id}/edit`}
+                    size="small"
+                    variant="outlined"
+                    startIcon={<Edit size={16} />}
+                  >
+                    Editar
+                  </Button>
                 ) : (
                   meeting.location?.includes('http') ? (
                     <Button 
