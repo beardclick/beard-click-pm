@@ -13,6 +13,8 @@ import { useRouter } from 'next/navigation'
 import { createMeetingAction, updateMeetingAction } from '@/app/actions/meetings'
 import { notifyAppCountsChanged } from '@/lib/client-events'
 import { Video, Save, X } from 'lucide-react'
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
+import dayjs, { Dayjs } from 'dayjs'
 
 interface Project {
   id: string
@@ -31,19 +33,14 @@ interface MeetingFormProps {
   }
 }
 
-function toLocalDatetime(value?: string | null) {
-  if (!value) return ''
 
-  const date = new Date(value)
-  const offset = date.getTimezoneOffset()
-  const localDate = new Date(date.getTime() - offset * 60000)
-  return localDate.toISOString().slice(0, 16)
-}
 
 export function MeetingForm({ projects, initialData }: MeetingFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [startsAt, setStartsAt] = useState<Dayjs | null>(initialData?.starts_at ? dayjs(initialData.starts_at) : null)
+  const [endsAt, setEndsAt] = useState<Dayjs | null>(initialData?.ends_at ? dayjs(initialData.ends_at) : null)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -99,24 +96,33 @@ export function MeetingForm({ projects, initialData }: MeetingFormProps) {
               )}
             </TextField>
 
-            <TextField
-              name="starts_at"
+            <input type="hidden" name="starts_at" value={startsAt ? startsAt.toISOString() : ''} />
+            <input type="hidden" name="ends_at" value={endsAt ? endsAt.toISOString() : ''} />
+
+            <DateTimePicker
               label="Fecha y Hora"
-              type="datetime-local"
-              fullWidth
-              required
-              slotProps={{ inputLabel: { shrink: true } }}
-              helperText="Duración estimada: 1 hora"
-              defaultValue={toLocalDatetime(initialData?.starts_at)}
+              value={startsAt}
+              onChange={(newValue) => setStartsAt(newValue)}
+              minutesStep={15}
+              slotProps={{ 
+                textField: { 
+                  fullWidth: true, 
+                  required: true, 
+                  helperText: "Duración estimada: 1 hora" 
+                } 
+              }}
             />
 
-            <TextField
-              name="ends_at"
+            <DateTimePicker
               label="Fecha y Hora de Fin"
-              type="datetime-local"
-              fullWidth
-              slotProps={{ inputLabel: { shrink: true } }}
-              defaultValue={toLocalDatetime(initialData?.ends_at)}
+              value={endsAt}
+              onChange={(newValue) => setEndsAt(newValue)}
+              minutesStep={15}
+              slotProps={{ 
+                textField: { 
+                  fullWidth: true 
+                } 
+              }}
             />
 
             <TextField

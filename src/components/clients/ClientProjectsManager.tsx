@@ -17,6 +17,8 @@ import InputAdornment from '@mui/material/InputAdornment'
 import { Link2, Plus, Trash2 } from 'lucide-react'
 import { assignProjectToClientAction, createProjectAction } from '@/app/actions/projects'
 import { notifyAppCountsChanged } from '@/lib/client-events'
+import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import dayjs, { Dayjs } from 'dayjs'
 
 type ReassignableProject = {
   id: string
@@ -50,6 +52,7 @@ export function ClientProjectsManager({
   const createFormRef = useRef<HTMLFormElement>(null)
   const webAccessCounterRef = useRef(2)
   const [webAccessRows, setWebAccessRows] = useState([{ id: 1 }])
+  const [dueDate, setDueDate] = useState<Dayjs | null>(null)
 
   const [createState, createFormAction, isCreatingProject] = useActionState<ActionState, FormData>(
     async (_prevState, formData) => {
@@ -88,6 +91,7 @@ export function ClientProjectsManager({
     createFormRef.current?.reset()
     webAccessCounterRef.current = 2
     setWebAccessRows([{ id: 1 }])
+    setDueDate(null)
     notifyAppCountsChanged()
     router.refresh()
   }, [createState, router])
@@ -158,13 +162,12 @@ export function ClientProjectsManager({
                   </TextField>
                 </Grid>
                 <Grid size={{ xs: 12, md: 3 }}>
-                  <TextField
-                    name="due_date"
+                  <input type="hidden" name="due_date" value={dueDate ? dueDate.format('YYYY-MM-DD') : ''} />
+                  <DatePicker
                     label="Fecha de Entrega"
-                    type="date"
-                    fullWidth
-                    size="small"
-                    slotProps={{ inputLabel: { shrink: true } }}
+                    value={dueDate}
+                    onChange={(newValue) => setDueDate(newValue)}
+                    slotProps={{ textField: { fullWidth: true, size: "small" } }}
                   />
                 </Grid>
                 <Grid size={{ xs: 12 }}>
