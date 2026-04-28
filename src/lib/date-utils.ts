@@ -6,7 +6,8 @@
 const DATE_LOCALE = 'es-ES'
 
 /** Format a date as DD/MM/YYYY */
-export function formatDate(value: string | Date): string {
+export function formatDate(value: string | Date | null | undefined): string {
+  if (!value) return '—'
   const date = typeof value === 'string' ? new Date(value) : value
   if (isNaN(date.getTime())) return '—'
   return date.toLocaleDateString(DATE_LOCALE, {
@@ -17,7 +18,8 @@ export function formatDate(value: string | Date): string {
 }
 
 /** Format a date-only string (YYYY-MM-DD) as DD/MM/YYYY without timezone shift */
-export function formatDateOnly(value: string): string {
+export function formatDateOnly(value: string | null | undefined): string {
+  if (!value) return '—'
   const date = new Date(`${value}T00:00:00`)
   if (isNaN(date.getTime())) return '—'
   return date.toLocaleDateString(DATE_LOCALE, {
@@ -28,7 +30,8 @@ export function formatDateOnly(value: string): string {
 }
 
 /** Format a datetime as DD/MM/YYYY HH:MM */
-export function formatDateTime(value: string | Date): string {
+export function formatDateTime(value: string | Date | null | undefined): string {
+  if (!value) return '—'
   const date = typeof value === 'string' ? new Date(value) : value
   if (isNaN(date.getTime())) return '—'
   return date.toLocaleString(DATE_LOCALE, {
