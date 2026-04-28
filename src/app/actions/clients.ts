@@ -235,6 +235,7 @@ export async function createClientAction(formData: FormData) {
     .insert([{
       name,
       email,
+      phone,
       company: company || null,
       ruc: ruc || null
     }])
@@ -315,20 +316,12 @@ export async function getClient(id: string) {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('clients')
-    .select(`
-      *,
-      profiles (phone)
-    `)
+    .select('*')
     .eq('id', id)
     .single()
     
   if (error) return null
-  
-  // Flatten profiles data into the client object for easier consumption by ClientForm
-  return {
-    ...data,
-    phone: data.profiles?.phone || ''
-  }
+  return data
 }
 
 export async function getClientDetail(id: string) {
@@ -337,10 +330,7 @@ export async function getClientDetail(id: string) {
 
     const { data: client, error: clientError } = await supabase
       .from('clients')
-      .select(`
-        *,
-        profiles (phone)
-      `)
+      .select('*')
       .eq('id', id)
       .single()
 
@@ -445,6 +435,7 @@ export async function updateClientAction(id: string, formData: FormData) {
     .update({
       name,
       email,
+      phone,
       company: company || null,
       ruc: ruc || null,
       updated_at: new Date().toISOString()

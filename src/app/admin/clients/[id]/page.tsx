@@ -124,12 +124,12 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                   </Box>
                 )}
 
-                {(client.phone || client.profiles?.phone) && (
+                {client.phone && (
                   <Box>
                     <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
                       TELÉFONO
                     </Typography>
-                    <Typography variant="body2">{client.phone || client.profiles?.phone}</Typography>
+                    <Typography variant="body2">{client.phone}</Typography>
                   </Box>
                 )}
 
