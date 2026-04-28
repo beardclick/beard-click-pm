@@ -445,7 +445,6 @@ export async function getReassignableProjectsForClient(clientId: string) {
       client_id,
       clients (name)
     `)
-    .neq('client_id', clientId)
     .order('name', { ascending: true })
 
   if (error) {

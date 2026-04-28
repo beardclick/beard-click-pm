@@ -299,19 +299,30 @@ export function ClientProjectsManager({
                   required
                   fullWidth
                   size="small"
-                  defaultValue={reassignableProjects[0]?.id || ''}
+                  defaultValue={reassignableProjects.find(p => p.client_id !== clientId)?.id || ''}
                 >
-                  {reassignableProjects.map((project) => (
-                    <MenuItem key={project.id} value={project.id}>
-                      {project.name}
-                      {(() => {
-                        const currentClientName = Array.isArray(project.clients)
-                          ? project.clients[0]?.name
-                          : project.clients?.name
-                        return currentClientName ? ` (actual: ${currentClientName})` : ''
-                      })()}
-                    </MenuItem>
-                  ))}
+                  <MenuItem value="" disabled>
+                    <em>Selecciona un proyecto</em>
+                  </MenuItem>
+                  {reassignableProjects.map((project) => {
+                    const isAlreadyAssigned = project.client_id === clientId;
+                    return (
+                      <MenuItem 
+                        key={project.id} 
+                        value={project.id}
+                        disabled={isAlreadyAssigned}
+                        sx={isAlreadyAssigned ? { opacity: 0.5, fontStyle: 'italic' } : {}}
+                      >
+                        {project.name}
+                        {isAlreadyAssigned ? ' (Ya asignado)' : (() => {
+                          const currentClientName = Array.isArray(project.clients)
+                            ? project.clients[0]?.name
+                            : project.clients?.name
+                          return currentClientName ? ` (actual: ${currentClientName})` : ''
+                        })()}
+                      </MenuItem>
+                    );
+                  })}
                 </TextField>
 
                 <Divider sx={{ my: 2 }} />
