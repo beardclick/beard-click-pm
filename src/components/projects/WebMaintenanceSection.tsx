@@ -21,6 +21,10 @@ import IconButton from '@mui/material/IconButton'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs, { Dayjs } from 'dayjs'
 import { Wrench, Plus, X } from 'lucide-react'
+import MenuItem from '@mui/material/MenuItem'
+import Select from '@mui/material/Select'
+import FormControl from '@mui/material/FormControl'
+import InputLabel from '@mui/material/InputLabel'
 import { createProjectMaintenanceAction } from '@/app/actions/projects'
 import { notifyAppCountsChanged } from '@/lib/client-events'
 import { formatDateOnly, formatDateTime } from '@/lib/date-utils'
@@ -48,16 +52,27 @@ interface WebMaintenanceSectionProps {
 export function WebMaintenanceSection({ projectId, initialLogs }: WebMaintenanceSectionProps) {
   const router = useRouter()
   const formRef = useRef<HTMLFormElement>(null)
-  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null)
+  const [startDate, setStartDate] = useState<Dayjs | null>(dayjs())
+  const [duration, setDuration] = useState<number>(12)
+  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs().add(12, 'month'))
   const [notes, setNotes] = useState('')
   const [state, setState] = useState<ActionState>(null)
   const [isPending, setIsPending] = useState(false)
   const [open, setOpen] = useState(false)
 
+  // Auto-calculate end date when start date or duration changes
+  useEffect(() => {
+    if (startDate && startDate.isValid()) {
+      setSelectedDate(startDate.add(duration, 'month'))
+    }
+  }, [startDate, duration])
+
   useEffect(() => {
     if (!state?.success) return
 
-    setSelectedDate(null)
+    setStartDate(dayjs())
+    setDuration(12)
+    setSelectedDate(dayjs().add(12, 'month'))
     setNotes('')
     setOpen(false)
     notifyAppCountsChanged()
@@ -130,8 +145,37 @@ export function WebMaintenanceSection({ projectId, initialLogs }: WebMaintenance
           <DialogContent dividers>
             <Box component="form" ref={formRef} onSubmit={handleSubmit}>
               <Box sx={{ display: 'grid', gap: 2 }}>
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                  <DatePicker
+                    label="Fecha de Inicio"
+                    value={startDate}
+                    onChange={(newValue) => setStartDate(newValue)}
+                    format="DD/MM/YYYY"
+                    slotProps={{
+                      textField: {
+                        size: 'small',
+                        fullWidth: true,
+                        required: true,
+                      },
+                    }}
+                  />
+                  <FormControl size="small" fullWidth>
+                    <InputLabel>Duración del Plan</InputLabel>
+                    <Select
+                      value={duration}
+                      label="Duración del Plan"
+                      onChange={(e) => setDuration(Number(e.target.value))}
+                    >
+                      <MenuItem value={1}>1 Mes</MenuItem>
+                      <MenuItem value={3}>3 Meses</MenuItem>
+                      <MenuItem value={6}>6 Meses</MenuItem>
+                      <MenuItem value={12}>12 Meses</MenuItem>
+                      <MenuItem value={24}>24 Meses</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
                 <DatePicker
-                  label="Fecha de Vencimiento del Plan"
+                  label="Fecha de Vencimiento Calculada"
                   value={selectedDate}
                   onChange={(newValue) => setSelectedDate(newValue)}
                   format="DD/MM/YYYY"

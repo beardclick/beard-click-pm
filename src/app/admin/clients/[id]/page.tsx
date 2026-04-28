@@ -19,13 +19,48 @@ import { ClientProjectsManager } from "@/components/clients/ClientProjectsManage
 import { formatDateTime } from "@/lib/date-utils";
 
 export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  let resolvedParams: { id: string };
+  let detail: any;
+  let reassignableProjects: any[] = [];
+
   try {
-    const resolvedParams = await params;
-    const detail = await getClientDetail(resolvedParams.id);
-    const reassignableProjects = await getReassignableProjectsForClient(resolvedParams.id);
+    resolvedParams = await params;
+  } catch (e: any) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <Typography variant="h5" color="error">Error al resolver parámetros de la URL</Typography>
+        <Typography component="pre" variant="caption" sx={{ mt: 2, whiteSpace: 'pre-wrap', color: 'error.main' }}>
+          {e.message || String(e)}
+        </Typography>
+      </Box>
+    );
+  }
+
+  try {
+    detail = await getClientDetail(resolvedParams.id);
+  } catch (e: any) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <Typography variant="h5" color="error">Error al obtener datos del cliente</Typography>
+        <Typography variant="body1" sx={{ mt: 1 }}>ID del cliente: {resolvedParams.id}</Typography>
+        <Typography component="pre" variant="caption" sx={{ mt: 2, whiteSpace: 'pre-wrap', color: 'error.main', fontFamily: 'monospace' }}>
+          {e.message || String(e)}
+          {'\n'}
+          {e.stack}
+        </Typography>
+      </Box>
+    );
+  }
 
   if (!detail) {
     notFound();
+  }
+
+  try {
+    reassignableProjects = await getReassignableProjectsForClient(resolvedParams.id);
+  } catch (e: any) {
+    console.error('Error fetching reassignable projects:', e);
+    // Non-critical, continue with empty array
   }
 
   const { client, hasPortalAccess, projects, comments, files } = detail;
@@ -242,23 +277,4 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
       </Grid>
     </Box>
   );
-  } catch (error: any) {
-    return (
-      <Box sx={{ p: 4 }}>
-        <Typography variant="h4" color="error" gutterBottom>
-          Error al cargar los detalles del cliente
-        </Typography>
-        <Typography variant="body1" sx={{ mb: 2 }}>
-          Ha ocurrido un error inesperado al procesar los datos del cliente.
-        </Typography>
-        <Box sx={{ p: 2, bgcolor: 'background.paper', border: '1px solid', borderColor: 'error.main', borderRadius: 1, overflowX: 'auto' }}>
-          <Typography component="pre" variant="caption" color="error" sx={{ whiteSpace: 'pre-wrap' }}>
-            {error.message || String(error)}
-            {'\n'}
-            {error.stack}
-          </Typography>
-        </Box>
-      </Box>
-    );
-  }
 }

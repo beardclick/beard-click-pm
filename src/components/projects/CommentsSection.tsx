@@ -9,7 +9,10 @@ import Avatar from '@mui/material/Avatar'
 import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import IconButton from '@mui/material/IconButton'
-import { Send, Trash2 } from 'lucide-react'
+import Dialog from '@mui/material/Dialog'
+import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
+import { Send, Trash2, Plus, X } from 'lucide-react'
 import { createCommentAction, deleteCommentAction } from '@/app/actions/comments'
 import { createClient } from '@/lib/supabase/client'
 import { notifyAppCountsChanged } from '@/lib/client-events'
@@ -35,6 +38,7 @@ export function CommentsSection({ projectId, initialComments }: CommentsSectionP
   const [comments, setComments] = useState(initialComments)
   const [newComment, setNewComment] = useState('')
   const [loading, setLoading] = useState(false)
+  const [open, setOpen] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [currentUserProfile, setCurrentUserProfile] = useState<Comment['profiles'] | null>(null)
 
@@ -81,6 +85,7 @@ export function CommentsSection({ projectId, initialComments }: CommentsSectionP
           profiles: currentUserProfile || { full_name: 'Usuario' },
         },
       ])
+      setOpen(false)
       notifyAppCountsChanged()
     }
     setLoading(false)
@@ -98,9 +103,14 @@ export function CommentsSection({ projectId, initialComments }: CommentsSectionP
 
   return (
     <Box sx={{ mt: 4 }}>
-      <Typography variant="h6" sx={{fontWeight: 600}} gutterBottom>
-        Comentarios y Feedback
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h6" sx={{fontWeight: 600}}>
+          Comentarios y Feedback
+        </Typography>
+        <Button variant="contained" size="small" startIcon={<Plus size={16} />} onClick={() => setOpen(true)}>
+          Añadir Comentario
+        </Button>
+      </Box>
 
       <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
         <Stack spacing={3}>
@@ -140,28 +150,39 @@ export function CommentsSection({ projectId, initialComments }: CommentsSectionP
         </Stack>
       </Paper>
 
-      <Box component="form" onSubmit={handleSubmit}>
-        <TextField
-          fullWidth
-          multiline
-          rows={3}
-          placeholder="Escribe un comentario o actualización..."
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          variant="outlined"
-          sx={{ mb: 2 }}
-        />
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={!newComment.trim() || loading}
-            startIcon={<Send size={18} />}
-          >
-            Publicar Comentario
-          </Button>
+      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pr: 2 }}>
+          <DialogTitle>Escribir un Comentario</DialogTitle>
+          <IconButton onClick={() => setOpen(false)} size="small">
+            <X size={20} />
+          </IconButton>
         </Box>
-      </Box>
+        <DialogContent dividers>
+          <Box component="form" onSubmit={handleSubmit}>
+            <TextField
+              fullWidth
+              multiline
+              rows={4}
+              placeholder="Escribe un comentario o actualización..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              variant="outlined"
+              sx={{ mb: 2 }}
+              autoFocus
+            />
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={!newComment.trim() || loading}
+                startIcon={<Send size={18} />}
+              >
+                Publicar Comentario
+              </Button>
+            </Box>
+          </Box>
+        </DialogContent>
+      </Dialog>
     </Box>
   )
 }

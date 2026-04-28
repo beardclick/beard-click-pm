@@ -106,18 +106,18 @@ async function enrichProjectsData(
       .in('project_id', projectIds),
   ])
 
-  const webAccesses = webAccessesResult.error && webAccessesResult.error.code !== '42P01'
+  const webAccesses = webAccessesResult.error
     ? []
     : webAccessesResult.data || []
-  const maintenanceLogs = maintenanceResult.error && maintenanceResult.error.code !== '42P01'
+  const maintenanceLogs = maintenanceResult.error
     ? []
     : maintenanceResult.data || []
 
-  if (webAccessesResult.error && webAccessesResult.error.code !== '42P01') {
+  if (webAccessesResult.error && webAccessesResult.error.code !== '42P01' && !webAccessesResult.error.message?.includes('schema cache')) {
     console.error('Error fetching project web accesses for list:', webAccessesResult.error)
   }
 
-  if (maintenanceResult.error && maintenanceResult.error.code !== '42P01') {
+  if (maintenanceResult.error && maintenanceResult.error.code !== '42P01' && !maintenanceResult.error.message?.includes('schema cache')) {
     console.error('Error fetching maintenance logs for list:', maintenanceResult.error)
   }
 
@@ -254,7 +254,7 @@ export async function getProjectWebAccesses(projectId: string) {
     .order('created_at', { ascending: true })
 
   if (error) {
-    if (error.code !== '42P01') {
+    if (error.code !== '42P01' && !error.message?.includes('schema cache')) {
       console.error('Error fetching project web accesses:', error)
     }
     return []
