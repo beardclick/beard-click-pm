@@ -102,12 +102,14 @@ export function ProjectsList({ initialProjects }: ProjectsListProps) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           sx={{ flexGrow: 1, minWidth: '250px' }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search size={18} />
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search size={18} />
+                </InputAdornment>
+              ),
+            },
           }}
         />
         <FormControl size="small" sx={{ minWidth: 150 }}>
