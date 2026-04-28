@@ -19,9 +19,10 @@ import { ClientProjectsManager } from "@/components/clients/ClientProjectsManage
 import { formatDateTime } from "@/lib/date-utils";
 
 export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = await params;
-  const detail = await getClientDetail(resolvedParams.id);
-  const reassignableProjects = await getReassignableProjectsForClient(resolvedParams.id);
+  try {
+    const resolvedParams = await params;
+    const detail = await getClientDetail(resolvedParams.id);
+    const reassignableProjects = await getReassignableProjectsForClient(resolvedParams.id);
 
   if (!detail) {
     notFound();
@@ -241,4 +242,23 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
       </Grid>
     </Box>
   );
+  } catch (error: any) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <Typography variant="h4" color="error" gutterBottom>
+          Error al cargar los detalles del cliente
+        </Typography>
+        <Typography variant="body1" sx={{ mb: 2 }}>
+          Ha ocurrido un error inesperado al procesar los datos del cliente.
+        </Typography>
+        <Box sx={{ p: 2, bgcolor: 'background.paper', border: '1px solid', borderColor: 'error.main', borderRadius: 1, overflowX: 'auto' }}>
+          <Typography component="pre" variant="caption" color="error" sx={{ whiteSpace: 'pre-wrap' }}>
+            {error.message || String(error)}
+            {'\n'}
+            {error.stack}
+          </Typography>
+        </Box>
+      </Box>
+    );
+  }
 }
