@@ -15,8 +15,9 @@ import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import IconButton from "@mui/material/IconButton";
+import TextField from "@mui/material/TextField";
 import { alpha, useTheme } from "@mui/material/styles";
-import { ChevronLeft, ChevronRight, Video, Clock, X, Pencil } from "lucide-react";
+import { ChevronLeft, ChevronRight, Video, Clock, X, Pencil, Calendar as CalendarIcon } from "lucide-react";
 import Link from "next/link";
 import { getMeetings } from "@/app/actions/meetings";
 
@@ -35,29 +36,66 @@ const EventComponent = ({ event }: any) => (
   </Box>
 );
 
-const ToolbarComponent = ({ label, onNavigate }: any) => (
-  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2, gap: 1, flexWrap: "wrap" }}>
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-      <IconButton size="small" onClick={() => onNavigate("PREV")}>
-        <ChevronLeft size={18} />
-      </IconButton>
-      <Typography variant="h6" sx={{ fontWeight: 700, minWidth: 180 }}>
-        {label}
-      </Typography>
-      <IconButton size="small" onClick={() => onNavigate("NEXT")}>
-        <ChevronRight size={18} />
-      </IconButton>
+const ToolbarComponent = ({ label, onNavigate, date }: any) => {
+  const [jumpDate, setJumpDate] = useState(dayjs(date).format('YYYY-MM'));
+
+  const handleJump = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = e.target.value;
+    setJumpDate(newDate);
+    if (newDate) {
+      onNavigate("DATE", dayjs(newDate).toDate());
+    }
+  };
+
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2, gap: 1, flexWrap: "wrap" }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <IconButton size="small" onClick={() => onNavigate("PREV")}>
+          <ChevronLeft size={18} />
+        </IconButton>
+        <Typography variant="h6" sx={{ fontWeight: 700, minWidth: 180 }}>
+          {label}
+        </Typography>
+        <IconButton size="small" onClick={() => onNavigate("NEXT")}>
+          <ChevronRight size={18} />
+        </IconButton>
+      </Box>
+      
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <TextField
+          size="small"
+          type="month"
+          value={jumpDate}
+          onChange={handleJump}
+          sx={{ 
+            width: 160,
+            '& .MuiInputBase-root': {
+              fontSize: '0.875rem',
+            }
+          }}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <Box sx={{ mr: 1, color: 'text.secondary', display: 'flex' }}>
+                  <CalendarIcon size={16} />
+                </Box>
+              )
+            }
+          }}
+        />
+        <Button size="small" variant="outlined" onClick={() => onNavigate("TODAY")}>
+          Hoy
+        </Button>
+      </Box>
     </Box>
-    <Button size="small" variant="outlined" onClick={() => onNavigate("TODAY")}>
-      Hoy
-    </Button>
-  </Box>
-)
+  );
+};
 
 export default function AdminCalendarPage() {
   const theme = useTheme();
   const [events, setEvents] = useState<any[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   useEffect(() => {
     async function loadMeetings() {
@@ -174,9 +212,11 @@ export default function AdminCalendarPage() {
           }}
           culture="es"
           onSelectEvent={handleSelectEvent}
+          date={currentDate}
+          onNavigate={(newDate) => setCurrentDate(newDate)}
           components={{
             event: EventComponent,
-            toolbar: ToolbarComponent,
+            toolbar: (props) => <ToolbarComponent {...props} date={currentDate} />,
           }}
           style={{ height: "100%" }}
           eventPropGetter={() => ({
@@ -282,4 +322,3 @@ export default function AdminCalendarPage() {
     </Box>
   );
 }
-

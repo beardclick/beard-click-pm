@@ -91,6 +91,30 @@ export function Header() {
     return () => window.removeEventListener(APP_COUNTS_CHANGED_EVENT, handleCountsChanged);
   }, [loadHeaderData]);
 
+  useEffect(() => {
+    const supabase = createClient();
+    
+    // Subscribe to REALTIME notifications
+    const channel = supabase
+      .channel('realtime_notifications')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+        },
+        () => {
+          loadHeaderData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [loadHeaderData]);
+
   const totalUnread = useMemo(() => {
     return unreadNotificationCount;
   }, [unreadNotificationCount]);

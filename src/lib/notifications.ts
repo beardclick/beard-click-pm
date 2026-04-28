@@ -1,5 +1,10 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { isMissingTableError } from '@/lib/supabase-errors'
+import { 
+  sendNewCommentEmail, 
+  sendNewMeetingEmail, 
+  sendProjectAssignedEmail 
+} from '@/lib/emails'
 
 type NotificationType =
   | 'project_created'
@@ -20,6 +25,8 @@ interface NotificationPayload {
   relatedCommentId?: string | null
   relatedMeetingId?: string | null
 }
+
+const PORTAL_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://portal.beardclick.com'
 
 async function createNotifications({
   recipientIds,
@@ -59,60 +66,52 @@ async function createNotifications({
     if (isMissingTableError(error, 'notifications')) {
       return
     }
-
     console.error('Error creating notifications:', error)
   }
 }
 
-async function getClientProfileIdForProject(projectId: string) {
+async function getProjectWithClient(projectId: string) {
   const supabase = createAdminClient()
   const { data: project, error } = await supabase
     .from('projects')
-    .select(
-      `
-        client_id,
-        clients (
-          profile_id,
-          email
-        )
-      `
-    )
+    .select(`
+      id,
+      name,
+      client_id,
+      clients (
+        name,
+        email,
+        profile_id
+      )
+    `)
     .eq('id', projectId)
     .maybeSingle()
 
-  if (error || !project) {
-    if (error) console.error('Error finding project client for notification:', error)
-    return null
-  }
-
-  const client = Array.isArray(project.clients) ? project.clients[0] : project.clients
-  if (client?.profile_id) return client.profile_id
-  if (!client?.email) return null
-
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('id')
-    .ilike('email', String(client.email).trim().toLowerCase())
-    .eq('role', 'client')
-    .maybeSingle()
-
-  if (profileError) {
-    console.error('Error finding client profile for notification:', profileError)
-  }
-
-  return profile?.id || null
+  if (error || !project) return null
+  return project
 }
 
-async function getAdminProfileIds() {
+async function getProfile(profileId: string) {
   const supabase = createAdminClient()
-  const { data, error } = await supabase.from('profiles').select('id').eq('role', 'admin')
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, full_name, email, role')
+    .eq('id', profileId)
+    .maybeSingle()
+  
+  if (error) return null
+  return data
+}
 
-  if (error) {
-    console.error('Error finding admin profiles for notification:', error)
-    return []
-  }
+async function getAdminProfiles() {
+  const supabase = createAdminClient()
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, full_name, email')
+    .eq('role', 'admin')
 
-  return (data || []).map((profile) => profile.id)
+  if (error) return []
+  return data || []
 }
 
 export async function notifyClientForProjectEvent({
@@ -132,10 +131,17 @@ export async function notifyClientForProjectEvent({
   relatedCommentId?: string | null
   relatedMeetingId?: string | null
 }) {
-  const clientProfileId = await getClientProfileIdForProject(projectId)
+  const project = await getProjectWithClient(projectId)
+  if (!project) return
 
+  const client = Array.isArray(project.clients) ? project.clients[0] : project.clients
+  const recipientId = client?.profile_id
+  const recipientEmail = client?.email
+  const recipientName = client?.name || 'Cliente'
+
+  // Create in-app notification
   await createNotifications({
-    recipientIds: [clientProfileId],
+    recipientIds: [recipientId],
     actorId,
     type,
     title,
@@ -144,6 +150,39 @@ export async function notifyClientForProjectEvent({
     relatedCommentId,
     relatedMeetingId,
   })
+
+  // Send Email if applicable
+  if (recipientEmail && recipientId !== actorId) {
+    const projectUrl = `${PORTAL_URL}/client/projects/${projectId}`
+    const actorProfile = actorId ? await getProfile(actorId) : null
+    const actorName = actorProfile?.full_name || 'Administrador'
+
+    if (type === 'comment_added') {
+      await sendNewCommentEmail({
+        recipientEmail,
+        recipientName,
+        projectName: project.name,
+        commentAuthorName: actorName,
+        commentContent: message || '',
+        projectUrl,
+      })
+    } else if (type === 'meeting_created') {
+      await sendNewMeetingEmail({
+        recipientEmail,
+        recipientName,
+        projectName: project.name,
+        meetingTitle: title,
+        meetingDate: message || 'Consultar en el portal',
+      })
+    } else if (type === 'project_created') {
+      await sendProjectAssignedEmail({
+        recipientEmail,
+        recipientName,
+        projectName: project.name,
+        projectUrl,
+      })
+    }
+  }
 }
 
 export async function notifyAdminsForProjectEvent({
@@ -163,10 +202,12 @@ export async function notifyAdminsForProjectEvent({
   relatedCommentId?: string | null
   relatedMeetingId?: string | null
 }) {
-  const adminProfileIds = await getAdminProfileIds()
+  const admins = await getAdminProfiles()
+  const adminIds = admins.map(a => a.id)
 
+  // Create in-app notifications
   await createNotifications({
-    recipientIds: adminProfileIds,
+    recipientIds: adminIds,
     actorId,
     type,
     title,
@@ -175,4 +216,25 @@ export async function notifyAdminsForProjectEvent({
     relatedCommentId,
     relatedMeetingId,
   })
+
+  // Send Emails to admins (only for comments from clients)
+  if (type === 'comment_added') {
+    const project = await getProjectWithClient(projectId)
+    const actorProfile = actorId ? await getProfile(actorId) : null
+    const actorName = actorProfile?.full_name || 'Cliente'
+    const projectUrl = `${PORTAL_URL}/admin/projects/${projectId}`
+
+    for (const admin of admins) {
+      if (admin.id !== actorId && admin.email) {
+        await sendNewCommentEmail({
+          recipientEmail: admin.email,
+          recipientName: admin.full_name,
+          projectName: project?.name || 'Proyecto',
+          commentAuthorName: actorName,
+          commentContent: message || '',
+          projectUrl,
+        })
+      }
+    }
+  }
 }

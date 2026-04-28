@@ -18,13 +18,16 @@ import {
 import { Briefcase, Calendar, MessageSquare, Users, ChevronRight } from "lucide-react";
 import { formatDate, formatDateTime } from "@/lib/date-utils";
 import AppLink from "@/components/ui/AppLink";
+import { MarkSeen } from "@/components/dashboard/MarkSeen";
 
 export default async function AdminDashboardPage() {
-  const [stats, activities, meetings] = await Promise.all([
+  const [stats, activityData, meetings] = await Promise.all([
     getDashboardStats(),
     getRecentActivity(),
     getUpcomingMeetings()
   ]);
+
+  const { activity: activities, lastSeenAt } = activityData as { activity: any[], lastSeenAt: string | null };
 
   const cards = [
     { label: "Clientes", value: stats.clients, color: "#2563eb", icon: Users },
@@ -42,6 +45,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <Box>
+      <MarkSeen />
       <Typography variant="h5" sx={{fontWeight: 700}} gutterBottom>
         Panel de Control
       </Typography>
@@ -81,47 +85,66 @@ export default async function AdminDashboardPage() {
                 Actividad Reciente
               </Typography>
               <List sx={{ p: 0 }}>
-                {activities.length > 0 ? activities.map((activity, index) => (
-                  <Box key={activity.id}>
-                    <ListItem disablePadding>
-                      <ListItemButton
-                        component={AppLink}
-                        href={getActivityLink(activity)}
-                        sx={{
-                          px: 1,
-                          py: 1.5,
-                          borderRadius: 2,
-                          alignItems: 'flex-start',
-                          color: 'inherit',
-                          '&:hover': { bgcolor: 'action.hover' }
-                        }}
-                      >
-                        <ListItemAvatar>
-                          <Avatar src={activity.profiles?.avatar_url} sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}>
-                            {activity.profiles?.full_name?.[0] || 'U'}
-                          </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={
-                            <Typography variant="subtitle2" sx={{fontWeight: 700}}>
-                              {activity.title}
-                            </Typography>
-                          }
-                          secondary={
-                            <>
-                              <Typography component="span" variant="body2" color="text.primary" sx={{ display: 'inline', mr: 1 }}>
-                                {activity.profiles?.full_name}
+                {activities.length > 0 ? activities.map((activity, index) => {
+                  const isNew = !lastSeenAt || new Date(activity.created_at) > new Date(lastSeenAt);
+                  
+                  return (
+                    <Box key={activity.id}>
+                      <ListItem disablePadding>
+                        <ListItemButton
+                          component={AppLink}
+                          href={getActivityLink(activity)}
+                          sx={{
+                            px: 1,
+                            py: 1.5,
+                            borderRadius: 2,
+                            alignItems: 'flex-start',
+                            color: 'inherit',
+                            '&:hover': { bgcolor: 'action.hover' }
+                          }}
+                        >
+                          <ListItemAvatar sx={{ position: 'relative' }}>
+                            <Avatar src={activity.profiles?.avatar_url} sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}>
+                              {activity.profiles?.full_name?.[0] || 'U'}
+                            </Avatar>
+                            {isNew && (
+                              <Box 
+                                sx={{ 
+                                  position: 'absolute', 
+                                  top: 0, 
+                                  right: 8, 
+                                  width: 12, 
+                                  height: 12, 
+                                  bgcolor: 'error.main', 
+                                  borderRadius: '50%', 
+                                  border: '2px solid white',
+                                  zIndex: 1
+                                }} 
+                              />
+                            )}
+                          </ListItemAvatar>
+                          <ListItemText
+                            primary={
+                              <Typography variant="subtitle2" sx={{fontWeight: 700}}>
+                                {activity.title}
                               </Typography>
-                              {activity.description} — {formatDate(activity.created_at)}
-                            </>
-                          }
-                        />
-                        <ChevronRight size={18} style={{ alignSelf: 'center', opacity: 0.3 }} />
-                      </ListItemButton>
-                    </ListItem>
-                    {index < activities.length - 1 && <Divider component="li" />}
-                  </Box>
-                )) : (
+                            }
+                            secondary={
+                              <>
+                                <Typography component="span" variant="body2" color="text.primary" sx={{ display: 'inline', mr: 1 }}>
+                                  {activity.profiles?.full_name}
+                                </Typography>
+                                {activity.description} — {formatDate(activity.created_at)}
+                              </>
+                            }
+                          />
+                          <ChevronRight size={18} style={{ alignSelf: 'center', opacity: 0.3 }} />
+                        </ListItemButton>
+                      </ListItem>
+                      {index < activities.length - 1 && <Divider component="li" />}
+                    </Box>
+                  );
+                }) : (
                   <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
                     No hay actividad reciente para mostrar.
                   </Typography>
@@ -178,4 +201,3 @@ export default async function AdminDashboardPage() {
     </Box>
   );
 }
-

@@ -10,7 +10,10 @@ export async function getMeetings() {
     .from('meetings')
     .select(`
       *,
-      projects (name)
+      projects (
+        name,
+        clients (name)
+      )
     `)
     .order('starts_at', { ascending: true })
 
@@ -168,6 +171,15 @@ export async function updateMeetingAction(id: string, formData: FormData) {
     relatedMeetingId: data.id,
   })
 
+  // Log de actividad
+  await supabase.from('activity_logs').insert([{
+    actor_id: user?.id,
+    project_id,
+    title: 'Reunión actualizada',
+    description: `actualizó la reunión "${title}"`,
+    type: 'meeting_updated'
+  }])
+
   revalidatePath('/admin/meetings')
   revalidatePath('/client/meetings')
   revalidatePath('/admin/calendar')
@@ -186,6 +198,17 @@ export async function deleteMeetingAction(id: string) {
     .eq('id', id)
 
   if (error) return { error: 'Error al eliminar reunión' }
+
+  // Log de actividad
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) {
+    await supabase.from('activity_logs').insert([{
+      actor_id: user.id,
+      title: 'Reunión eliminada',
+      description: `eliminó una reunión`,
+      type: 'meeting_updated'
+    }])
+  }
 
   revalidatePath('/admin/meetings')
   revalidatePath('/client/meetings')

@@ -323,9 +323,7 @@ export async function createProjectAction(formData: FormData) {
     if (saveWebAccessesResult.error) {
       return { error: saveWebAccessesResult.error }
     }
-  }
 
-  if (data?.id) {
     await notifyClientForProjectEvent({
       projectId: data.id,
       actorId: user?.id,
@@ -333,6 +331,16 @@ export async function createProjectAction(formData: FormData) {
       title: 'Nuevo proyecto',
       message: name,
     })
+
+    // Log de actividad
+    await supabase.from('activity_logs').insert([{
+      actor_id: user?.id,
+      project_id: data.id,
+      client_id: client_id,
+      title: 'Nuevo proyecto creado',
+      description: `creó el proyecto "${name}"`,
+      type: 'project_created'
+    }])
   }
   
   revalidatePath('/admin/projects')
@@ -377,6 +385,18 @@ export async function updateProjectAction(id: string, formData: FormData) {
   if (saveWebAccessesResult.error) {
     return { error: saveWebAccessesResult.error }
   }
+
+  // Log de actividad
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) {
+    await supabase.from('activity_logs').insert([{
+      actor_id: user.id,
+      project_id: id,
+      title: 'Proyecto actualizado',
+      description: `actualizó los datos de "${name}"`,
+      type: 'project_updated'
+    }])
+  }
   
   revalidatePath('/admin/projects')
   revalidatePath(`/admin/projects/${id}`)
@@ -395,6 +415,17 @@ export async function deleteProjectAction(id: string) {
     .eq('id', id)
 
   if (error) return { error: error.message }
+  
+  // Log de actividad
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) {
+    await supabase.from('activity_logs').insert([{
+      actor_id: user.id,
+      title: 'Proyecto eliminado',
+      description: `eliminó un proyecto`,
+      type: 'project_updated'
+    }])
+  }
   
   revalidatePath('/admin/projects')
   revalidatePath('/client/projects')

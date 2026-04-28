@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { revalidatePath } from 'next/cache'
 
 export async function getDashboardStats() {
   const supabase = await createClient()
@@ -24,6 +25,19 @@ export async function getDashboardStats() {
 export async function getRecentActivity() {
   const supabase = await createClient()
   
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  let lastSeenAt = null
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('last_seen_activity_at')
+      .eq('id', user.id)
+      .maybeSingle()
+    
+    lastSeenAt = profile?.last_seen_activity_at || null
+  }
+  
   const { data, error } = await supabase
     .from('activity_logs')
     .select(`
@@ -31,14 +45,34 @@ export async function getRecentActivity() {
       profiles (full_name, avatar_url)
     `)
     .order('created_at', { ascending: false })
-    .limit(10)
+    .limit(15)
 
   if (error) {
     console.error('Error fetching activity:', error)
-    return []
+    return { activity: [], lastSeenAt }
   }
 
-  return data
+  return { activity: data, lastSeenAt }
+}
+
+export async function markActivityAsSeenAction() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  if (!user) return { error: 'No autorizado' }
+  
+  const { error } = await supabase
+    .from('profiles')
+    .update({ last_seen_activity_at: new Date().toISOString() })
+    .eq('id', user.id)
+  
+  if (error) {
+    console.error('Error updating last_seen_activity_at:', error)
+    return { error: error.message }
+  }
+  
+  revalidatePath('/admin')
+  return { success: true }
 }
 
 export async function getUpcomingMeetings() {

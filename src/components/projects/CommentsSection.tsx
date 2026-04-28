@@ -12,7 +12,7 @@ import IconButton from '@mui/material/IconButton'
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
-import { Send, Trash2, Plus, X } from 'lucide-react'
+import { Send, Trash2, Plus, X, ChevronDown } from 'lucide-react'
 import { createCommentAction, deleteCommentAction } from '@/app/actions/comments'
 import { createClient } from '@/lib/supabase/client'
 import { notifyAppCountsChanged } from '@/lib/client-events'
@@ -41,7 +41,14 @@ export function CommentsSection({ projectId, initialComments }: CommentsSectionP
   const [open, setOpen] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [currentUserProfile, setCurrentUserProfile] = useState<Comment['profiles'] | null>(null)
+  
+  // Pagination
+  const [page, setPage] = useState(1)
+  const itemsPerPage = 4
+  const paginatedComments = [...comments].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, page * itemsPerPage)
+  const hasMore = comments.length > paginatedComments.length
 
   useEffect(() => {
     async function getCurrentUser() {
@@ -54,11 +61,12 @@ export function CommentsSection({ projectId, initialComments }: CommentsSectionP
       if (user) {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('full_name, avatar_url')
+          .select('full_name, avatar_url, role')
           .eq('id', user.id)
           .maybeSingle()
 
         if (profile) {
+          setIsAdmin(profile.role === 'admin')
           setCurrentUserProfile({
             full_name: profile.full_name,
             avatar_url: profile.avatar_url || undefined,
@@ -81,11 +89,11 @@ export function CommentsSection({ projectId, initialComments }: CommentsSectionP
     if (result.success) {
       setNewComment('')
       setComments((current) => [
-        ...current,
         {
           ...result.comment,
           profiles: currentUserProfile || { full_name: 'Usuario' },
         },
+        ...current,
       ])
       setOpen(false)
       notifyAppCountsChanged()
@@ -96,7 +104,7 @@ export function CommentsSection({ projectId, initialComments }: CommentsSectionP
   }
 
   async function handleDelete(commentId: string) {
-    if (!confirm('¿Seguro que quieres borrar tu comentario?')) return
+    if (!confirm('¿Seguro que quieres borrar este comentario?')) return
 
     const result = await deleteCommentAction(commentId, projectId)
     if (result.success) {
@@ -118,7 +126,7 @@ export function CommentsSection({ projectId, initialComments }: CommentsSectionP
 
       <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
         <Stack spacing={3}>
-          {comments.length > 0 ? comments.map((comment) => (
+          {paginatedComments.length > 0 ? paginatedComments.map((comment) => (
             <Box key={comment.id}>
               <Box sx={{ display: 'flex', gap: 2 }}>
                 <Avatar src={comment.profiles.avatar_url} sx={{ width: 32, height: 32 }}>
@@ -136,7 +144,7 @@ export function CommentsSection({ projectId, initialComments }: CommentsSectionP
                   <Typography variant="body2" color="text.primary">
                     {comment.content}
                   </Typography>
-                  {comment.author_id === currentUserId && (
+                  {(comment.author_id === currentUserId || isAdmin) && (
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
                       <IconButton size="small" color="error" onClick={() => handleDelete(comment.id)}>
                         <Trash2 size={16} />
@@ -152,6 +160,19 @@ export function CommentsSection({ projectId, initialComments }: CommentsSectionP
             </Typography>
           )}
         </Stack>
+        
+        {hasMore && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, pt: 2, borderTop: 1, borderColor: 'divider' }}>
+            <Button 
+              variant="text" 
+              size="small" 
+              onClick={() => setPage(p => p + 1)}
+              endIcon={<ChevronDown size={16} />}
+            >
+              Ver más comentarios
+            </Button>
+          </Box>
+        )}
       </Paper>
 
       <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
@@ -192,4 +213,3 @@ export function CommentsSection({ projectId, initialComments }: CommentsSectionP
     </Box>
   )
 }
-

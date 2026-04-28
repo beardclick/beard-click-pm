@@ -178,7 +178,8 @@ export function MeetingsList({ initialMeetings, isAdmin = true }: MeetingsListPr
       return (
         meeting.title?.toLowerCase().includes(searchLower) ||
         meeting.location?.toLowerCase().includes(searchLower) ||
-        meeting.projects?.name?.toLowerCase().includes(searchLower)
+        meeting.projects?.name?.toLowerCase().includes(searchLower) ||
+        meeting.projects?.clients?.name?.toLowerCase().includes(searchLower)
       );
     });
   }, [initialMeetings, search]);

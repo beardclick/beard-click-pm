@@ -19,34 +19,34 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
-import { Search, Clock } from "lucide-react";
+import { Search, Clock, Briefcase } from "lucide-react";
 import Link from "next/link";
 import { formatDateTime } from "@/lib/date-utils";
 
 interface GlobalCommentsListProps {
   initialComments: any[];
+  projects: any[];
 }
 
-export function GlobalCommentsList({ initialComments }: GlobalCommentsListProps) {
+export function GlobalCommentsList({ initialComments, projects }: GlobalCommentsListProps) {
   const [search, setSearch] = useState('');
-  const [dateFilter, setDateFilter] = useState('recent');
+  const [projectFilter, setProjectFilter] = useState('all');
 
-  const filteredAndSortedComments = useMemo(() => {
+  const filteredComments = useMemo(() => {
     return initialComments
       .filter(comment => {
         const searchLower = search.toLowerCase();
-        return (
+        const matchesSearch = (
           comment.content?.toLowerCase().includes(searchLower) ||
           comment.profiles?.full_name?.toLowerCase().includes(searchLower) ||
           comment.projects?.name?.toLowerCase().includes(searchLower)
         );
-      })
-      .sort((a, b) => {
-        const dateA = new Date(a.created_at).getTime();
-        const dateB = new Date(b.created_at).getTime();
-        return dateFilter === 'recent' ? dateB - dateA : dateA - dateB;
+        
+        const matchesProject = projectFilter === 'all' || comment.project_id === projectFilter;
+        
+        return matchesSearch && matchesProject;
       });
-  }, [initialComments, search, dateFilter]);
+  }, [initialComments, search, projectFilter]);
 
   return (
     <Box>
@@ -67,15 +67,26 @@ export function GlobalCommentsList({ initialComments }: GlobalCommentsListProps)
             },
           }}
         />
-        <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel>Fecha</InputLabel>
+        
+        <FormControl size="small" sx={{ minWidth: 200 }}>
+          <InputLabel id="project-filter-label">Filtrar por Proyecto</InputLabel>
           <Select
-            value={dateFilter}
-            label="Fecha"
-            onChange={(e) => setDateFilter(e.target.value)}
+            labelId="project-filter-label"
+            value={projectFilter}
+            label="Filtrar por Proyecto"
+            onChange={(e) => setProjectFilter(e.target.value)}
+            startAdornment={
+              <InputAdornment position="start">
+                <Briefcase size={16} />
+              </InputAdornment>
+            }
           >
-            <MenuItem value="recent">Más recientes</MenuItem>
-            <MenuItem value="oldest">Más antiguos</MenuItem>
+            <MenuItem value="all">Todos los proyectos</MenuItem>
+            {projects.map((project) => (
+              <MenuItem key={project.id} value={project.id}>
+                {project.name}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
       </Box>
@@ -83,7 +94,7 @@ export function GlobalCommentsList({ initialComments }: GlobalCommentsListProps)
       <Card variant="outlined">
         <CardContent sx={{ p: 0 }}>
           <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
-            {filteredAndSortedComments.length > 0 ? filteredAndSortedComments.map((comment, index) => (
+            {filteredComments.length > 0 ? filteredComments.map((comment, index) => (
               <Box key={comment.id}>
                 <ListItem disablePadding>
                   <ListItemButton
@@ -131,7 +142,7 @@ export function GlobalCommentsList({ initialComments }: GlobalCommentsListProps)
                     />
                   </ListItemButton>
                 </ListItem>
-                {index < filteredAndSortedComments.length - 1 && <Divider variant="inset" component="li" />}
+                {index < filteredComments.length - 1 && <Divider variant="inset" component="li" />}
               </Box>
             )) : (
               <Box sx={{ p: 6, textAlign: 'center' }}>

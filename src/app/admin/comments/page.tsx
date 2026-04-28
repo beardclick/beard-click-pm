@@ -1,10 +1,14 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { getGlobalComments } from "@/app/actions/comments";
+import { getProjects } from "@/app/actions/projects";
 import { GlobalCommentsList } from "@/components/comments/GlobalCommentsList";
 
 export default async function AdminCommentsPage() {
-  const comments = await getGlobalComments();
+  const [comments, projects] = await Promise.all([
+    getGlobalComments(),
+    getProjects()
+  ]);
 
   return (
     <Box>
@@ -13,9 +17,8 @@ export default async function AdminCommentsPage() {
       </Typography>
 
       <Box sx={{ mt: 3 }}>
-        <GlobalCommentsList initialComments={comments} />
+        <GlobalCommentsList initialComments={comments} projects={projects} />
       </Box>
     </Box>
   );
 }
-

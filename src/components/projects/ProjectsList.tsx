@@ -134,21 +134,6 @@ export function ProjectsList({ initialProjects, isAdmin = true }: ProjectsListPr
             <MenuItem value="cancelled">Cancelados</MenuItem>
           </Select>
         </FormControl>
-        <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel>Fecha</InputLabel>
-          <Select
-            value={dateFilter}
-            label="Fecha"
-            onChange={(e) => {
-              setDateFilter(e.target.value);
-              setSortField('created_at');
-              setSortOrder(e.target.value === 'recent' ? 'desc' : 'asc');
-            }}
-          >
-            <MenuItem value="recent">Más recientes</MenuItem>
-            <MenuItem value="oldest">Más antiguos</MenuItem>
-          </Select>
-        </FormControl>
       </Box>
 
       <Card variant="outlined">
