@@ -153,6 +153,7 @@ export function ProjectForm({ initialData, clients }: ProjectFormProps) {
               label="Fecha de Vencimiento"
               value={dueDate}
               onChange={(newValue) => setDueDate(newValue)}
+              format="DD/MM/YYYY"
               slotProps={{ textField: { fullWidth: true, size: "small" } }}
             />
           </Grid>

@@ -45,9 +45,10 @@ type SortOrder = 'asc' | 'desc';
 
 interface ProjectsListProps {
   initialProjects: any[];
+  isAdmin?: boolean;
 }
 
-export function ProjectsList({ initialProjects }: ProjectsListProps) {
+export function ProjectsList({ initialProjects, isAdmin = true }: ProjectsListProps) {
   const [search, setSearch] = useState('');
   const [sortField, setSortField] = useState<SortField>('created_at');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
@@ -165,16 +166,18 @@ export function ProjectsList({ initialProjects }: ProjectsListProps) {
                     Proyecto
                   </TableSortLabel>
                 </TableCell>
-                <TableCell>
-                  <TableSortLabel
-                    active={sortField === 'client_name'}
-                    direction={sortField === 'client_name' ? sortOrder : 'asc'}
-                    onClick={() => handleSort('client_name')}
-                    sx={{ fontWeight: 700 }}
-                  >
-                    Cliente
-                  </TableSortLabel>
-                </TableCell>
+                {isAdmin && (
+                  <TableCell>
+                    <TableSortLabel
+                      active={sortField === 'client_name'}
+                      direction={sortField === 'client_name' ? sortOrder : 'asc'}
+                      onClick={() => handleSort('client_name')}
+                      sx={{ fontWeight: 700 }}
+                    >
+                      Cliente
+                    </TableSortLabel>
+                  </TableCell>
+                )}
                 <TableCell sx={{ fontWeight: 700 }}>URL Principal</TableCell>
                 <TableCell>
                   <TableSortLabel
@@ -232,7 +235,7 @@ export function ProjectsList({ initialProjects }: ProjectsListProps) {
                     <TableCell>
                       <Typography variant="body2" sx={{fontWeight: 600}}>{project.name}</Typography>
                     </TableCell>
-                    <TableCell>{project.clients?.name || "N/A"}</TableCell>
+                    {isAdmin && <TableCell>{project.clients?.name || "N/A"}</TableCell>}
                     <TableCell sx={{ minWidth: 220 }}>
                       {project.primary_website_url ? (
                         <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
@@ -275,12 +278,12 @@ export function ProjectsList({ initialProjects }: ProjectsListProps) {
                     </TableCell>
                     <TableCell align="right">
                       <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
-                        <Link href={`/admin/projects/${project.id}`}>
+                        <Link href={isAdmin ? `/admin/projects/${project.id}` : `/client/projects/${project.id}`}>
                           <IconButton size="small" color="primary">
                             <Eye size={18} />
                           </IconButton>
                         </Link>
-                        <ProjectDeleteButton projectId={project.id} />
+                        {isAdmin && <ProjectDeleteButton projectId={project.id} />}
                       </Box>
                     </TableCell>
                   </TableRow>

@@ -35,3 +35,18 @@ a {
 .pulse-dot {
   animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* Make sorting arrows visible even when not hovered */
+.MuiTableSortLabel-icon {
+  opacity: 0.4 !important;
+  transition: opacity 0.2s ease-in-out !important;
+}
+
+.MuiTableSortLabel-root.Mui-active .MuiTableSortLabel-icon {
+  opacity: 1 !important;
+}
+
+.MuiTableSortLabel-root:hover .MuiTableSortLabel-icon {
+  opacity: 0.8 !important;
+}
+

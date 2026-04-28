@@ -192,6 +192,7 @@ export function ClientProjectsManager({
                     label="Fecha de Entrega"
                     value={dueDate}
                     onChange={(newValue) => setDueDate(newValue)}
+                    format="DD/MM/YYYY"
                     slotProps={{ textField: { fullWidth: true, size: "small" } }}
                   />
                 </Grid>

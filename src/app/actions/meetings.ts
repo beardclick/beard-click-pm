@@ -81,6 +81,7 @@ export async function createMeetingAction(formData: FormData) {
       starts_at,
       ends_at: final_ends_at,
       location: location || null,
+      created_by: user.id,
     }])
     .select()
     .single()

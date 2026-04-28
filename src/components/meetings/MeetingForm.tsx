@@ -104,6 +104,7 @@ export function MeetingForm({ projects, initialData }: MeetingFormProps) {
               value={startsAt}
               onChange={(newValue) => setStartsAt(newValue)}
               minutesStep={15}
+              format="DD/MM/YYYY HH:mm"
               slotProps={{ 
                 textField: { 
                   fullWidth: true, 
@@ -118,6 +119,7 @@ export function MeetingForm({ projects, initialData }: MeetingFormProps) {
               value={endsAt}
               onChange={(newValue) => setEndsAt(newValue)}
               minutesStep={15}
+              format="DD/MM/YYYY HH:mm"
               slotProps={{ 
                 textField: { 
                   fullWidth: true 
