@@ -308,80 +308,91 @@ export async function getClient(id: string) {
 }
 
 export async function getClientDetail(id: string) {
-  const supabase = await createClient()
+  try {
+    const supabase = await createClient()
 
-  const { data: client, error: clientError } = await supabase
-    .from('clients')
-    .select('*')
-    .eq('id', id)
-    .single()
+    const { data: client, error: clientError } = await supabase
+      .from('clients')
+      .select('*')
+      .eq('id', id)
+      .single()
 
-  if (clientError || !client) {
+    if (clientError || !client) {
+      console.error('getClientDetail: client fetch error', clientError)
+      return null
+    }
+
+    const { data: projects, error: projectsError } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('client_id', id)
+      .order('created_at', { ascending: false })
+
+    if (projectsError) {
+      console.error('getClientDetail: projects fetch error', projectsError)
+    }
+
+    const projectIds = (projects || []).map((project) => project.id)
+
+    let comments: any[] = []
+    let files: any[] = []
+
+    if (projectIds.length > 0) {
+      try {
+        const { data: commentsData, error: commentsError } = await supabase
+          .from('comments')
+          .select(`*, profiles (full_name, avatar_url), projects (name)`)
+          .in('project_id', projectIds)
+          .order('created_at', { ascending: false })
+          .limit(20)
+
+        if (commentsError) {
+          console.error('getClientDetail: comments fetch error', commentsError.code, commentsError.message)
+        } else {
+          comments = commentsData || []
+        }
+      } catch (err) {
+        console.error('getClientDetail: comments unexpected error', err)
+      }
+
+      try {
+        const { data: filesData, error: filesError } = await supabase
+          .from('project_files')
+          .select(`*, projects (name)`)
+          .in('project_id', projectIds)
+          .order('created_at', { ascending: false })
+          .limit(20)
+
+        if (filesError) {
+          console.error('getClientDetail: files fetch error', filesError.code, filesError.message)
+        } else {
+          files = filesData || []
+        }
+      } catch (err) {
+        console.error('getClientDetail: files unexpected error', err)
+      }
+    }
+
+    let hasPortalAccess = false
+    try {
+      hasPortalAccess = (await getClientAccessMap([client.email])).get(String(client.email || '').trim().toLowerCase()) ?? false
+    } catch (err) {
+      console.error('getClientDetail: getClientAccessMap error', err)
+    }
+
+    return {
+      client,
+      hasPortalAccess,
+      projects: projects || [],
+      comments,
+      files,
+    }
+  } catch (err) {
+    console.error('getClientDetail: top-level unexpected exception', err)
     return null
   }
-
-  const { data: projects, error: projectsError } = await supabase
-    .from('projects')
-    .select('*')
-    .eq('client_id', id)
-    .order('created_at', { ascending: false })
-
-  if (projectsError) {
-    console.error('Error fetching client projects:', projectsError)
-  }
-
-  const projectIds = (projects || []).map((project) => project.id)
-
-  let comments: any[] = []
-  let files: any[] = []
-
-  if (projectIds.length > 0) {
-    // Comments query
-    const { data: commentsData, error: commentsError } = await supabase
-      .from('comments')
-      .select(`
-        *,
-        profiles (full_name, avatar_url),
-        projects (name)
-      `)
-      .in('project_id', projectIds)
-      .order('created_at', { ascending: false })
-      .limit(20)
-
-    if (commentsError) {
-      console.error('Error fetching client comments:', commentsError)
-    } else {
-      comments = commentsData || []
-    }
-
-    // Files query - resilient to missing table
-    const { data: filesData, error: filesError } = await supabase
-      .from('project_files')
-      .select(`
-        *,
-        projects (name)
-      `)
-      .in('project_id', projectIds)
-      .order('created_at', { ascending: false })
-      .limit(20)
-
-    if (filesError) {
-      if (filesError.code !== '42P01' && !filesError.message?.includes('schema cache')) {
-        console.error('Error fetching client files:', filesError)
-      }
-    } else {
-      files = filesData || []
-    }
-  }
-
-  return {
-    client,
-    hasPortalAccess: (await getClientAccessMap([client.email])).get(String(client.email || '').trim().toLowerCase()) ?? false,
-    projects: projects || [],
-    comments,
-    files,
-  }
 }
+
 
 export async function updateClientAction(id: string, formData: FormData) {
   const supabase = await createClient()

@@ -93,141 +93,134 @@ async function enrichProjectsData(
     return []
   }
 
-  const projectIds = projects.map((project) => project.id)
-  const [webAccessesResult, maintenanceResult] = await Promise.all([
-    supabase
-      .from('project_web_accesses')
-      .select('project_id, website_url')
-      .in('project_id', projectIds)
-      .order('created_at', { ascending: true }),
-    supabase
-      .from('project_maintenance_logs')
-      .select('project_id, maintenance_date')
-      .in('project_id', projectIds),
-  ])
+  try {
+    const projectIds = projects.map((project) => project.id)
+    const [webAccessesResult, maintenanceResult] = await Promise.all([
+      supabase
+        .from('project_web_accesses')
+        .select('project_id, website_url')
+        .in('project_id', projectIds)
+        .order('created_at', { ascending: true }),
+      supabase
+        .from('project_maintenance_logs')
+        .select('project_id, maintenance_date')
+        .in('project_id', projectIds),
+    ])
 
-  const webAccesses = webAccessesResult.error
-    ? []
-    : webAccessesResult.data || []
-  const maintenanceLogs = maintenanceResult.error
-    ? []
-    : maintenanceResult.data || []
+    const webAccesses = webAccessesResult.error ? [] : (webAccessesResult.data || [])
+    const maintenanceLogs = maintenanceResult.error ? [] : (maintenanceResult.data || [])
 
-  if (webAccessesResult.error && webAccessesResult.error.code !== '42P01' && !webAccessesResult.error.message?.includes('schema cache')) {
-    console.error('Error fetching project web accesses for list:', webAccessesResult.error)
-  }
-
-  if (maintenanceResult.error && maintenanceResult.error.code !== '42P01' && !maintenanceResult.error.message?.includes('schema cache')) {
-    console.error('Error fetching maintenance logs for list:', maintenanceResult.error)
-  }
-
-  const websiteByProject = new Map<string, string>()
-  const websiteCountByProject = new Map<string, number>()
-  const maintenanceExpirationByProject = new Map<string, string>()
-  const today = new Date().toISOString().slice(0, 10)
-
-  for (const webAccess of webAccesses) {
-    const projectId = String(webAccess.project_id)
-    const currentCount = websiteCountByProject.get(projectId) || 0
-    websiteCountByProject.set(projectId, currentCount + 1)
-
-    if (!websiteByProject.has(projectId) && webAccess.website_url) {
-      websiteByProject.set(projectId, webAccess.website_url)
+    if (webAccessesResult.error) {
+      console.error('enrichProjectsData: web accesses error', webAccessesResult.error.code, webAccessesResult.error.message)
     }
-  }
-
-  for (const log of maintenanceLogs) {
-    const projectId = String(log.project_id)
-    const maintenanceDate = typeof log.maintenance_date === 'string' ? log.maintenance_date : null
-    if (!maintenanceDate) {
-      continue
+    if (maintenanceResult.error) {
+      console.error('enrichProjectsData: maintenance logs error', maintenanceResult.error.code, maintenanceResult.error.message)
     }
 
-    const currentLatest = maintenanceExpirationByProject.get(projectId)
-    if (!currentLatest || maintenanceDate > currentLatest) {
-      maintenanceExpirationByProject.set(projectId, maintenanceDate)
+    const websiteByProject = new Map<string, string>()
+    const websiteCountByProject = new Map<string, number>()
+    const maintenanceExpirationByProject = new Map<string, string>()
+    const today = new Date().toISOString().slice(0, 10)
+
+    for (const webAccess of webAccesses) {
+      const projectId = String(webAccess.project_id)
+      const currentCount = websiteCountByProject.get(projectId) || 0
+      websiteCountByProject.set(projectId, currentCount + 1)
+      if (!websiteByProject.has(projectId) && webAccess.website_url) {
+        websiteByProject.set(projectId, webAccess.website_url)
+      }
     }
-  }
 
-  return projects.map((project) => {
-    const maintenanceExpirationDate = maintenanceExpirationByProject.get(project.id) || null
+    for (const log of maintenanceLogs) {
+      const projectId = String(log.project_id)
+      const maintenanceDate = typeof log.maintenance_date === 'string' ? log.maintenance_date : null
+      if (!maintenanceDate) continue
+      const currentLatest = maintenanceExpirationByProject.get(projectId)
+      if (!currentLatest || maintenanceDate > currentLatest) {
+        maintenanceExpirationByProject.set(projectId, maintenanceDate)
+      }
+    }
 
-    return {
+    return projects.map((project) => {
+      const maintenanceExpirationDate = maintenanceExpirationByProject.get(project.id) || null
+      return {
+        ...project,
+        files_count: project.project_files?.[0]?.count ?? 0,
+        primary_website_url: websiteByProject.get(project.id) || null,
+        website_urls_count: websiteCountByProject.get(project.id) || 0,
+        maintenance_plan_expires_at: maintenanceExpirationDate,
+        maintenance_plan_active: maintenanceExpirationDate ? maintenanceExpirationDate >= today : false,
+      }
+    })
+  } catch (err) {
+    console.error('enrichProjectsData: unexpected error, returning raw projects', err)
+    return projects.map((project) => ({
       ...project,
-      files_count: project.project_files?.[0]?.count || 0,
-      primary_website_url: websiteByProject.get(project.id) || null,
-      website_urls_count: websiteCountByProject.get(project.id) || 0,
-      maintenance_plan_expires_at: maintenanceExpirationDate,
-      maintenance_plan_active: maintenanceExpirationDate ? maintenanceExpirationDate >= today : false,
-    }
-  })
+      files_count: 0,
+      primary_website_url: null,
+      website_urls_count: 0,
+      maintenance_plan_expires_at: null,
+      maintenance_plan_active: false,
+    }))
+  }
 }
 
 export async function getProjects() {
-  const supabase = await createClient()
-  
-  // Intento 1: Con joins (si ya aplicaron la migración)
-  const { data, error } = await supabase
-    .from('projects')
-    .select(`
-      *,
-      clients (name),
-      project_files (count)
-    `)
-    .order('created_at', { ascending: false })
-
-  if (error) {
-    console.error('Error fetching projects with joins:', error)
+  try {
+    const supabase = await createClient()
     
-    // Intento 2: Sin el join de archivos (por si la relación falló)
-    const { data: dataSimple, error: errorSimple } = await supabase
+    // Try with project_files count join
+    const { data, error } = await supabase
       .from('projects')
-      .select(`
-        *,
-        clients (name)
-      `)
+      .select(`*, clients (name), project_files (count)`)
       .order('created_at', { ascending: false })
-    
-    if (errorSimple) {
-      console.error('Error fetching projects simple:', errorSimple)
-      return []
-    }
-    
-    return enrichProjectsData(supabase, dataSimple || [])
-  }
 
-  return enrichProjectsData(supabase, data || [])
+    if (error) {
+      console.error('getProjects: join error, falling back', error.code, error.message)
+      // Fallback: without project_files join
+      const { data: dataSimple, error: errorSimple } = await supabase
+        .from('projects')
+        .select(`*, clients (name)`)
+        .order('created_at', { ascending: false })
+      if (errorSimple) {
+        console.error('getProjects: fallback also failed', errorSimple)
+        return []
+      }
+      return enrichProjectsData(supabase, dataSimple || [])
+    }
+
+    return enrichProjectsData(supabase, data || [])
+  } catch (err) {
+    console.error('getProjects: unexpected exception', err)
+    return []
+  }
 }
 
 export async function getClientProjects(clientId: string) {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('projects')
-    .select(`
-      *,
-      clients (name),
-      project_files (count)
-    `)
-    .eq('client_id', clientId)
-    .order('created_at', { ascending: false })
-
-  if (error) {
-    console.error('Error fetching client projects with joins:', error)
-    
-    const { data: dataSimple, error: errorSimple } = await supabase
+  try {
+    const supabase = await createClient()
+    const { data, error } = await supabase
       .from('projects')
-      .select(`
-        *,
-        clients (name)
-      `)
+      .select(`*, clients (name), project_files (count)`)
       .eq('client_id', clientId)
       .order('created_at', { ascending: false })
-    
-    if (errorSimple) return []
-    return enrichProjectsData(supabase, dataSimple || [])
-  }
 
-  return enrichProjectsData(supabase, data || [])
+    if (error) {
+      console.error('getClientProjects: join error, falling back', error.code, error.message)
+      const { data: dataSimple, error: errorSimple } = await supabase
+        .from('projects')
+        .select(`*, clients (name)`)
+        .eq('client_id', clientId)
+        .order('created_at', { ascending: false })
+      if (errorSimple) return []
+      return enrichProjectsData(supabase, dataSimple || [])
+    }
+
+    return enrichProjectsData(supabase, data || [])
+  } catch (err) {
+    console.error('getClientProjects: unexpected exception', err)
+    return []
+  }
 }
 
 export async function getProject(id: string) {
