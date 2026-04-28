@@ -68,3 +68,14 @@ CREATE TABLE IF NOT EXISTS project_maintenance_logs (
 );
 
 CREATE INDEX IF NOT EXISTS idx_project_maintenance_logs_project_id ON project_maintenance_logs(project_id);
+
+-- 8. Ensure meetings table has created_by column
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'meetings' AND column_name = 'created_by') THEN
+        ALTER TABLE meetings ADD COLUMN created_by uuid REFERENCES profiles(id) ON DELETE CASCADE;
+    END IF;
+END $$;
+
+-- 9. Reload PostgREST schema cache to ensure all new tables and columns are recognized
+NOTIFY pgrst, 'reload schema';
