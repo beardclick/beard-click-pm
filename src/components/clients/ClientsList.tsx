@@ -21,6 +21,7 @@ import Select from "@mui/material/Select";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import TableSortLabel from "@mui/material/TableSortLabel";
+import Tooltip from "@mui/material/Tooltip";
 import { ClientDeleteButton } from "@/components/clients/ClientDeleteButton";
 import { ClientPortalAccessButton } from "@/components/clients/ClientPortalAccessButton";
 import { CopyEmailButton } from "@/components/clients/CopyEmailButton";
@@ -192,7 +193,43 @@ export function ClientsList({ initialClients }: ClientsListProps) {
                     </Box>
                   </TableCell>
                   <TableCell>
-                    <Chip label={client.projectsCount} size="small" variant="outlined" sx={{ fontWeight: 600 }} />
+                    <Tooltip
+                      interactive
+                      title={
+                        client.projects?.length > 0 ? (
+                          <Box sx={{ p: 1 }}>
+                            <Typography variant="subtitle2" sx={{ mb: 1, borderBottom: '1px solid rgba(255,255,255,0.2)', pb: 0.5 }}>
+                              Proyectos ({client.projects.length})
+                            </Typography>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                              {client.projects.map((p: any) => (
+                                <Link
+                                  key={p.id}
+                                  href={`/admin/projects/${p.id}`}
+                                  style={{
+                                    color: '#90caf9',
+                                    textDecoration: 'none',
+                                    fontSize: '0.8rem',
+                                    display: 'block'
+                                  }}
+                                  onMouseOver={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+                                  onMouseOut={(e) => (e.currentTarget.style.textDecoration = 'none')}
+                                >
+                                  • {p.name}
+                                </Link>
+                              ))}
+                            </Box>
+                          </Box>
+                        ) : "Sin proyectos"
+                      }
+                    >
+                      <Chip
+                        label={client.projectsCount}
+                        size="small"
+                        variant="outlined"
+                        sx={{ fontWeight: 600, cursor: client.projects?.length > 0 ? 'pointer' : 'default' }}
+                      />
+                    </Tooltip>
                   </TableCell>
                   <TableCell sx={{ fontSize: '0.875rem', color: 'text.secondary' }}>
                     {formatDate(client.created_at)}

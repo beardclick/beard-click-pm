@@ -195,7 +195,7 @@ export async function getClients() {
     .from('clients')
     .select(`
       *,
-      projects (id)
+      projects (id, name)
     `)
     .order('created_at', { ascending: false })
 
