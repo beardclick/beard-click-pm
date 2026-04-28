@@ -7,9 +7,10 @@ import { Check, Copy } from 'lucide-react'
 
 interface CopyProjectUrlButtonProps {
   url: string | null
+  size?: 'small' | 'medium' | 'large'
 }
 
-export function CopyProjectUrlButton({ url }: CopyProjectUrlButtonProps) {
+export function CopyProjectUrlButton({ url, size = "small" }: CopyProjectUrlButtonProps) {
   const [copied, setCopied] = useState(false)
 
   async function handleCopy() {
@@ -25,7 +26,7 @@ export function CopyProjectUrlButton({ url }: CopyProjectUrlButtonProps) {
   return (
     <Tooltip title={copied ? 'Copiado' : 'Copiar URL'}>
       <span>
-        <IconButton size="small" onClick={handleCopy} disabled={!url}>
+        <IconButton size={size} onClick={handleCopy} disabled={!url}>
           {copied ? <Check size={16} /> : <Copy size={16} />}
         </IconButton>
       </span>
