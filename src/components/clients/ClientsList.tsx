@@ -194,7 +194,6 @@ export function ClientsList({ initialClients }: ClientsListProps) {
                   </TableCell>
                   <TableCell>
                     <Tooltip
-                      disableInteractive={false}
                       title={
                         client.projects?.length > 0 ? (
                           <Box sx={{ p: 1 }}>
