@@ -51,8 +51,8 @@ create table if not exists project_web_accesses (
   id uuid primary key default gen_random_uuid(),
   project_id uuid not null references projects(id) on delete cascade,
   website_url text not null,
-  access_username text not null,
-  access_password text not null,
+  access_username text not null default '',
+  access_password text not null default '',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

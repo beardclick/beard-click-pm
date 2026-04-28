@@ -25,7 +25,7 @@ import { ClientDeleteButton } from "@/components/clients/ClientDeleteButton";
 import { ClientPortalAccessButton } from "@/components/clients/ClientPortalAccessButton";
 import { CopyEmailButton } from "@/components/clients/CopyEmailButton";
 
-type SortField = 'name' | 'company' | 'created_at' | 'projectsCount';
+type SortField = 'name' | 'company' | 'email' | 'created_at' | 'projectsCount';
 type SortOrder = 'asc' | 'desc';
 
 interface ClientsListProps {
@@ -50,7 +50,7 @@ export function ClientsList({ initialClients }: ClientsListProps) {
       })
       .sort((a, b) => {
         let comparison = 0;
-        if (sortField === 'name' || sortField === 'company') {
+        if (sortField === 'name' || sortField === 'company' || sortField === 'email') {
           comparison = (a[sortField] || '').localeCompare(b[sortField] || '');
         } else if (sortField === 'projectsCount') {
           comparison = a.projectsCount - b.projectsCount;
@@ -120,7 +120,16 @@ export function ClientsList({ initialClients }: ClientsListProps) {
                   Cliente / Empresa
                 </TableSortLabel>
               </TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Email</TableCell>
+              <TableCell>
+                <TableSortLabel
+                  active={sortField === 'email'}
+                  direction={sortField === 'email' ? sortOrder : 'asc'}
+                  onClick={() => handleSort('email')}
+                  sx={{ fontWeight: 700 }}
+                >
+                  Email
+                </TableSortLabel>
+              </TableCell>
               <TableCell>
                 <TableSortLabel
                   active={sortField === 'projectsCount'}

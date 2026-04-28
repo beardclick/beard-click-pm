@@ -107,6 +107,18 @@ export function getAppTheme(mode: AppThemeMode) {
           },
         },
       },
+      MuiTableSortLabel: {
+        styleOverrides: {
+          root: {
+            '& .MuiTableSortLabel-icon': {
+              opacity: 0.4,
+            },
+            '&.Mui-active .MuiTableSortLabel-icon': {
+              opacity: 1,
+            },
+          },
+        },
+      },
       MuiCard: {
         styleOverrides: {
           root: {

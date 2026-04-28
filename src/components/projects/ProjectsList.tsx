@@ -39,7 +39,7 @@ const statusLabel: Record<string, string> = {
   "cancelled": "Cancelado"
 };
 
-type SortField = 'name' | 'client_name' | 'status' | 'created_at';
+type SortField = 'name' | 'client_name' | 'status' | 'created_at' | 'maintenance' | 'files_count';
 type SortOrder = 'asc' | 'desc';
 
 interface ProjectsListProps {
@@ -77,6 +77,12 @@ export function ProjectsList({ initialProjects }: ProjectsListProps) {
           comparison = (a.clients?.name || '').localeCompare(b.clients?.name || '');
         } else if (sortField === 'status') {
           comparison = (a.status || '').localeCompare(b.status || '');
+        } else if (sortField === 'maintenance') {
+          const aActive = a.maintenance_plan_active ? 1 : 0;
+          const bActive = b.maintenance_plan_active ? 1 : 0;
+          comparison = aActive - bActive;
+        } else if (sortField === 'files_count') {
+          comparison = (a.files_count || 0) - (b.files_count || 0);
         } else {
           comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
         }
@@ -169,7 +175,16 @@ export function ProjectsList({ initialProjects }: ProjectsListProps) {
                   </TableSortLabel>
                 </TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>URL Principal</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Mantenimiento</TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortField === 'maintenance'}
+                    direction={sortField === 'maintenance' ? sortOrder : 'asc'}
+                    onClick={() => handleSort('maintenance')}
+                    sx={{ fontWeight: 700 }}
+                  >
+                    Mantenimiento
+                  </TableSortLabel>
+                </TableCell>
                 <TableCell>
                   <TableSortLabel
                     active={sortField === 'status'}
@@ -190,7 +205,16 @@ export function ProjectsList({ initialProjects }: ProjectsListProps) {
                     Creado
                   </TableSortLabel>
                 </TableCell>
-                <TableCell sx={{ fontWeight: 700 }} align="center">Archivos</TableCell>
+                <TableCell align="center">
+                  <TableSortLabel
+                    active={sortField === 'files_count'}
+                    direction={sortField === 'files_count' ? sortOrder : 'asc'}
+                    onClick={() => handleSort('files_count')}
+                    sx={{ fontWeight: 700 }}
+                  >
+                    Archivos
+                  </TableSortLabel>
+                </TableCell>
                 <TableCell sx={{ fontWeight: 700 }} align="right">Acciones</TableCell>
               </TableRow>
             </TableHead>

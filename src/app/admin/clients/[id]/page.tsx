@@ -203,20 +203,20 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                         <Box key={file.id}>
                           <ListItem
                             component="a"
-                            href={file.url}
+                            href={file.file_path || file.url}
                             target="_blank"
                             rel="noreferrer"
                             sx={{ px: 0, color: "inherit" }}
                           >
                             <ListItemText
-                              primary={file.name}
+                              primary={file.file_name || file.name || 'Archivo'}
                               secondary={
                                 <>
                                   <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
                                     Proyecto: {file.projects?.name || "Sin proyecto"}
                                   </Typography>
                                   <Typography variant="caption" color="text.secondary">
-                                    {file.profiles?.full_name || "Usuario"} • {new Date(file.created_at).toLocaleString()}
+                                    {(file.profiles?.full_name || file.uploaded_by_profile?.full_name || "Usuario")} • {new Date(file.created_at).toLocaleString()}
                                   </Typography>
                                 </>
                               }

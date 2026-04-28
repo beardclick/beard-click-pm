@@ -6,8 +6,8 @@ import { revalidatePath } from 'next/cache'
 
 type ProjectWebAccessInput = {
   website_url: string
-  access_username: string
-  access_password: string
+  access_username?: string
+  access_password?: string
 }
 
 function normalizeFormValue(value: FormDataEntryValue | null) {
@@ -35,14 +35,10 @@ function parseProjectWebAccesses(formData: FormData): { data?: ProjectWebAccessI
       return { error: `La URL del sitio es obligatoria en la fila ${index + 1}.` }
     }
 
-    if (!accessUsername || !accessPassword) {
-      return { error: `Debes completar usuario y contraseña en la fila ${index + 1}.` }
-    }
-
     rows.push({
       website_url: websiteUrl,
-      access_username: accessUsername,
-      access_password: accessPassword,
+      access_username: accessUsername || undefined,
+      access_password: accessPassword || undefined,
     })
   }
 
@@ -71,13 +67,17 @@ async function saveProjectWebAccesses(
   const rowsToInsert = webAccesses.map((access) => ({
     project_id: projectId,
     website_url: access.website_url,
-    access_username: access.access_username,
-    access_password: access.access_password,
+    access_username: access.access_username || '',
+    access_password: access.access_password || '',
   }))
 
   const { error: insertError } = await supabase.from('project_web_accesses').insert(rowsToInsert)
 
   if (insertError) {
+    if (insertError.message?.includes('schema cache') || insertError.code === '42P01') {
+      console.error('Table project_web_accesses not found. Please create it in Supabase.')
+      return { error: 'La tabla de accesos web no existe. Contacta al administrador.' }
+    }
     console.error('Error saving project web accesses:', insertError)
     return { error: insertError.message }
   }

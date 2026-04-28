@@ -336,28 +336,17 @@ export async function getClientDetail(id: string) {
   let files: any[] = []
 
   if (projectIds.length > 0) {
-    const [{ data: commentsData, error: commentsError }, { data: filesData, error: filesError }] = await Promise.all([
-      supabase
-        .from('comments')
-        .select(`
-          *,
-          profiles (full_name, avatar_url),
-          projects (name)
-        `)
-        .in('project_id', projectIds)
-        .order('created_at', { ascending: false })
-        .limit(20),
-      supabase
-        .from('project_files')
-        .select(`
-          *,
-          profiles:uploaded_by (full_name),
-          projects (name)
-        `)
-        .in('project_id', projectIds)
-        .order('created_at', { ascending: false })
-        .limit(20),
-    ])
+    // Comments query
+    const { data: commentsData, error: commentsError } = await supabase
+      .from('comments')
+      .select(`
+        *,
+        profiles (full_name, avatar_url),
+        projects (name)
+      `)
+      .in('project_id', projectIds)
+      .order('created_at', { ascending: false })
+      .limit(20)
 
     if (commentsError) {
       console.error('Error fetching client comments:', commentsError)
@@ -365,8 +354,21 @@ export async function getClientDetail(id: string) {
       comments = commentsData || []
     }
 
+    // Files query - resilient to missing table
+    const { data: filesData, error: filesError } = await supabase
+      .from('project_files')
+      .select(`
+        *,
+        projects (name)
+      `)
+      .in('project_id', projectIds)
+      .order('created_at', { ascending: false })
+      .limit(20)
+
     if (filesError) {
-      console.error('Error fetching client files:', filesError)
+      if (filesError.code !== '42P01' && !filesError.message?.includes('schema cache')) {
+        console.error('Error fetching client files:', filesError)
+      }
     } else {
       files = filesData || []
     }
