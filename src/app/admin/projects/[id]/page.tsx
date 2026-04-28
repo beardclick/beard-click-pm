@@ -145,44 +145,81 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
                 </Link>
               </Box>
               
-              <List disablePadding>
-                {meetings.length > 0 ? meetings.map((meeting: any, index: number) => (
-                  <Box key={meeting.id}>
-                    <ListItem sx={{ px: 0, py: 1.5 }}>
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="subtitle2" sx={{fontWeight: 700}}>
-                          {meeting.title}
-                        </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5, color: 'text.secondary' }}>
-                          <Clock size={14} />
-                          <Typography variant="caption">
-                            {formatDateTime(meeting.starts_at)}
-                          </Typography>
+              {(() => {
+                const now = new Date().getTime();
+                const upcoming = meetings.filter((m: any) => new Date(m.starts_at).getTime() >= now).sort((a: any, b: any) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime());
+                const past = meetings.filter((m: any) => new Date(m.starts_at).getTime() < now).sort((a: any, b: any) => new Date(b.starts_at).getTime() - new Date(a.starts_at).getTime());
+
+                return (
+                  <>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mt: 1, mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Clock size={16} /> Próximas
+                    </Typography>
+                    <List disablePadding>
+                      {upcoming.length > 0 ? upcoming.map((meeting: any, index: number) => (
+                        <Box key={meeting.id}>
+                          <ListItem sx={{ px: 0, py: 1.5 }}>
+                            <Box sx={{ flex: 1 }}>
+                              <Typography variant="subtitle2" sx={{fontWeight: 700}}>
+                                {meeting.title}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                                {formatDateTime(meeting.starts_at)}
+                              </Typography>
+                              {meeting.meeting_url && (
+                                <Button 
+                                  component="a" 
+                                  href={meeting.meeting_url} 
+                                  target="_blank"
+                                  size="small" 
+                                  variant="outlined" 
+                                  fullWidth
+                                  startIcon={<Video size={14} />}
+                                  sx={{ mt: 1.5 }}
+                                >
+                                  Unirse
+                                </Button>
+                              )}
+                            </Box>
+                          </ListItem>
+                          {index < upcoming.length - 1 && <Divider />}
                         </Box>
-                        {meeting.meeting_url && (
-                          <Button 
-                            component="a" 
-                            href={meeting.meeting_url} 
-                            target="_blank"
-                            size="small" 
-                            variant="outlined" 
-                            fullWidth
-                            startIcon={<Video size={14} />}
-                            sx={{ mt: 1.5 }}
-                          >
-                            Unirse a la llamada
-                          </Button>
-                        )}
-                      </Box>
-                    </ListItem>
-                    {index < meetings.length - 1 && <Divider />}
-                  </Box>
-                )) : (
-                  <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
-                    No hay reuniones programadas.
-                  </Typography>
-                )}
-              </List>
+                      )) : (
+                        <Typography variant="body2" color="text.secondary" sx={{ py: 1 }}>
+                          No hay reuniones próximas.
+                        </Typography>
+                      )}
+                    </List>
+
+                    <Divider sx={{ my: 2 }} />
+
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: 'text.secondary' }}>
+                      Pasadas
+                    </Typography>
+                    <List disablePadding>
+                      {past.length > 0 ? past.map((meeting: any, index: number) => (
+                        <Box key={meeting.id}>
+                          <ListItem sx={{ px: 0, py: 1.5, opacity: 0.8 }}>
+                            <Box sx={{ flex: 1 }}>
+                              <Typography variant="subtitle2" sx={{fontWeight: 600}}>
+                                {meeting.title}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                                {formatDateTime(meeting.starts_at)}
+                              </Typography>
+                            </Box>
+                          </ListItem>
+                          {index < past.length - 1 && <Divider />}
+                        </Box>
+                      )) : (
+                        <Typography variant="body2" color="text.secondary" sx={{ py: 1 }}>
+                          No hay reuniones pasadas.
+                        </Typography>
+                      )}
+                    </List>
+                  </>
+                );
+              })()}
             </CardContent>
           </Card>
         </Grid>
