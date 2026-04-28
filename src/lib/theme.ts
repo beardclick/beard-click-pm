@@ -109,12 +109,12 @@ export function getAppTheme(mode: AppThemeMode) {
       },
       MuiTableSortLabel: {
         styleOverrides: {
+          icon: {
+            opacity: '0.5 !important',
+          },
           root: {
-            '& .MuiTableSortLabel-icon': {
-              opacity: 0.4,
-            },
             '&.Mui-active .MuiTableSortLabel-icon': {
-              opacity: 1,
+              opacity: '1 !important',
             },
           },
         },
