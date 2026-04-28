@@ -88,7 +88,7 @@ export async function createMeetingAction(formData: FormData) {
 
   if (error) {
     console.error('Error creating meeting:', error)
-    return { error: 'No se pudo agendar la reunión' }
+    return { error: `No se pudo agendar la reunión: ${error.message}` }
   }
 
   await notifyClientForProjectEvent({
@@ -156,7 +156,7 @@ export async function updateMeetingAction(id: string, formData: FormData) {
 
   if (error) {
     console.error('Error updating meeting:', error)
-    return { error: 'No se pudo actualizar la reunión' }
+    return { error: `No se pudo actualizar la reunión: ${error.message}` }
   }
 
   await notifyClientForProjectEvent({

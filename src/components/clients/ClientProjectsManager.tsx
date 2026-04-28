@@ -14,7 +14,12 @@ import MenuItem from '@mui/material/MenuItem'
 import Divider from '@mui/material/Divider'
 import IconButton from '@mui/material/IconButton'
 import InputAdornment from '@mui/material/InputAdornment'
-import { Link2, Plus, Trash2 } from 'lucide-react'
+import Dialog from '@mui/material/Dialog'
+import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
+import Tabs from '@mui/material/Tabs'
+import Tab from '@mui/material/Tab'
+import { Link2, Plus, Trash2, X } from 'lucide-react'
 import { assignProjectToClientAction, createProjectAction } from '@/app/actions/projects'
 import { notifyAppCountsChanged } from '@/lib/client-events'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
@@ -53,6 +58,8 @@ export function ClientProjectsManager({
   const webAccessCounterRef = useRef(2)
   const [webAccessRows, setWebAccessRows] = useState([{ id: 1 }])
   const [dueDate, setDueDate] = useState<Dayjs | null>(null)
+  const [open, setOpen] = useState(false)
+  const [tabIndex, setTabIndex] = useState(0)
 
   const [createState, createFormAction, isCreatingProject] = useActionState<ActionState, FormData>(
     async (_prevState, formData) => {
@@ -93,6 +100,7 @@ export function ClientProjectsManager({
     setWebAccessRows([{ id: 1 }])
     setDueDate(null)
     notifyAppCountsChanged()
+    setOpen(false)
     router.refresh()
   }, [createState, router])
 
@@ -102,6 +110,7 @@ export function ClientProjectsManager({
     }
 
     notifyAppCountsChanged()
+    setOpen(false)
     router.refresh()
   }, [assignState, router])
 
@@ -121,16 +130,32 @@ export function ClientProjectsManager({
   }
 
   return (
-    <Grid container spacing={3} sx={{ mb: 3 }}>
-      <Grid size={{ xs: 12, xl: 8 }}>
-        <Card variant="outlined" sx={{ height: '100%' }}>
-          <CardContent>
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
-              Crear Proyecto Para Este Cliente
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              Crea un proyecto sin salir de esta vista y registra de una vez los accesos web.
-            </Typography>
+    <>
+      <Button variant="contained" startIcon={<Plus size={18} />} onClick={() => setOpen(true)}>
+        Añadir Proyecto
+      </Button>
+
+      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pr: 2 }}>
+          <DialogTitle sx={{ pb: 0 }}>Gestionar Proyectos</DialogTitle>
+          <IconButton onClick={() => setOpen(false)} size="small">
+            <X size={20} />
+          </IconButton>
+        </Box>
+        
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 3, pt: 1 }}>
+          <Tabs value={tabIndex} onChange={(_, nv) => setTabIndex(nv)}>
+            <Tab label="Crear Nuevo" />
+            <Tab label="Asignar Existente" />
+          </Tabs>
+        </Box>
+
+        <DialogContent dividers sx={{ p: { xs: 2, sm: 3 } }}>
+          {tabIndex === 0 && (
+            <Box>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                Crea un proyecto sin salir de esta vista y registra de una vez los accesos web.
+              </Typography>
 
             <Box component="form" ref={createFormRef} action={createFormAction}>
               <input type="hidden" name="client_id" value={clientId} />
@@ -275,19 +300,14 @@ export function ClientProjectsManager({
                 </Button>
               </Box>
             </Box>
-          </CardContent>
-        </Card>
-      </Grid>
+          </Box>
+          )}
 
-      <Grid size={{ xs: 12, xl: 4 }}>
-        <Card variant="outlined" sx={{ height: '100%' }}>
-          <CardContent>
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
-              Asignar Proyecto Existente
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
-              Mueve un proyecto existente desde otro cliente hacia este cliente.
-            </Typography>
+          {tabIndex === 1 && (
+            <Box>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                Mueve un proyecto existente desde otro cliente hacia este cliente.
+              </Typography>
 
             {reassignableProjects.length === 0 ? (
               <Alert severity="info">
@@ -343,15 +363,16 @@ export function ClientProjectsManager({
                 )}
 
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                  <Button type="submit" variant="outlined" disabled={isAssigningProject}>
+                  <Button type="submit" variant="contained" disabled={isAssigningProject}>
                     {isAssigningProject ? 'Asignando...' : 'Asignar Proyecto'}
                   </Button>
                 </Box>
               </Box>
             )}
-          </CardContent>
-        </Card>
-      </Grid>
-    </Grid>
+          </Box>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }

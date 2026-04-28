@@ -96,19 +96,20 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
         </Grid>
 
         <Grid size={{ xs: 12, md: 8 }}>
-          <ClientProjectsManager
-            clientId={client.id}
-            reassignableProjects={reassignableProjects}
-          />
-
           <Card variant="outlined" sx={{ mb: 3 }}>
             <CardContent>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-                <Briefcase size={18} />
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  Proyectos
-                </Typography>
-                <Chip size="small" label={projects.length} />
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2, flexWrap: "wrap", gap: 2 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Briefcase size={18} />
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Proyectos
+                  </Typography>
+                  <Chip size="small" label={projects.length} />
+                </Box>
+                <ClientProjectsManager
+                  clientId={client.id}
+                  reassignableProjects={reassignableProjects}
+                />
               </Box>
 
               {projects.length > 0 ? (
