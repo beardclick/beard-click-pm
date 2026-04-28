@@ -320,7 +320,9 @@ export async function getClient(id: string) {
     .eq('id', id)
     .single()
     
-  if (error) return null
+  if (error) {
+    throw new Error(`Error al obtener cliente: ${error.message}`)
+  }
   return data
 }
 
@@ -334,8 +336,11 @@ export async function getClientDetail(id: string) {
       .eq('id', id)
       .single()
 
-    if (clientError || !client) {
-      console.error('getClientDetail: client fetch error', clientError)
+    if (clientError) {
+      throw new Error(`Error al obtener detalles del cliente: ${clientError.message}`)
+    }
+
+    if (!client) {
       return null
     }
 
