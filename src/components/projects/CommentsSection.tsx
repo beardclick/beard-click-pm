@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
@@ -8,14 +8,17 @@ import Button from '@mui/material/Button'
 import Avatar from '@mui/material/Avatar'
 import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
-import Divider from '@mui/material/Divider'
-import { Send } from 'lucide-react'
-import { createCommentAction } from '@/app/actions/comments'
+import IconButton from '@mui/material/IconButton'
+import { Send, Trash2 } from 'lucide-react'
+import { createCommentAction, deleteCommentAction } from '@/app/actions/comments'
+import { createClient } from '@/lib/supabase/client'
+import { notifyAppCountsChanged } from '@/lib/client-events'
 
 interface Comment {
   id: string
   content: string
   created_at: string
+  author_id: string
   profiles: {
     full_name: string
     avatar_url?: string
@@ -31,6 +34,35 @@ export function CommentsSection({ projectId, initialComments }: CommentsSectionP
   const [comments, setComments] = useState(initialComments)
   const [newComment, setNewComment] = useState('')
   const [loading, setLoading] = useState(false)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [currentUserProfile, setCurrentUserProfile] = useState<Comment['profiles'] | null>(null)
+
+  useEffect(() => {
+    async function getCurrentUser() {
+      const supabase = createClient()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      setCurrentUserId(user?.id || null)
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name, avatar_url')
+          .eq('id', user.id)
+          .maybeSingle()
+
+        if (profile) {
+          setCurrentUserProfile({
+            full_name: profile.full_name,
+            avatar_url: profile.avatar_url || undefined,
+          })
+        }
+      }
+    }
+
+    getCurrentUser()
+  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -41,11 +73,26 @@ export function CommentsSection({ projectId, initialComments }: CommentsSectionP
     
     if (result.success) {
       setNewComment('')
-      // En una app real, revalidaríamos desde el servidor, 
-      // aquí actualizamos localmente para feedback inmediato.
-      window.location.reload() 
+      setComments((current) => [
+        ...current,
+        {
+          ...result.comment,
+          profiles: currentUserProfile || { full_name: 'Usuario' },
+        },
+      ])
+      notifyAppCountsChanged()
     }
     setLoading(false)
+  }
+
+  async function handleDelete(commentId: string) {
+    if (!confirm('¿Seguro que quieres borrar tu comentario?')) return
+
+    const result = await deleteCommentAction(commentId, projectId)
+    if (result.success) {
+      setComments((current) => current.filter((comment) => comment.id !== commentId))
+      notifyAppCountsChanged()
+    }
   }
 
   return (
@@ -74,6 +121,13 @@ export function CommentsSection({ projectId, initialComments }: CommentsSectionP
                   <Typography variant="body2" color="text.primary">
                     {comment.content}
                   </Typography>
+                  {comment.author_id === currentUserId && (
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+                      <IconButton size="small" color="error" onClick={() => handleDelete(comment.id)}>
+                        <Trash2 size={16} />
+                      </IconButton>
+                    </Box>
+                  )}
                 </Box>
               </Box>
             </Box>

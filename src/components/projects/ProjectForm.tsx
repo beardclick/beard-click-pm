@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useRef, useState } from 'react'
 import { createProjectAction, updateProjectAction } from '@/app/actions/projects'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -11,14 +11,46 @@ import Paper from '@mui/material/Paper'
 import Grid from '@mui/material/Grid'
 import Alert from '@mui/material/Alert'
 import MenuItem from '@mui/material/MenuItem'
+import Typography from '@mui/material/Typography'
+import IconButton from '@mui/material/IconButton'
+import InputAdornment from '@mui/material/InputAdornment'
+import Divider from '@mui/material/Divider'
+import { Link2, Plus, Trash2 } from 'lucide-react'
+import { notifyAppCountsChanged } from '@/lib/client-events'
+
+type ProjectWebAccess = {
+  website_url: string
+  access_username: string
+  access_password: string
+}
 
 interface ProjectFormProps {
   initialData?: any;
-  clients: { id: string, name: string }[];
+  clients: { id: string, name: string, company?: string | null }[];
 }
 
 export function ProjectForm({ initialData, clients }: ProjectFormProps) {
   const router = useRouter()
+  const rowIdCounterRef = useRef(2)
+  const initialWebAccesses: ProjectWebAccess[] = initialData?.web_accesses?.length
+    ? initialData.web_accesses.map((access: any) => ({
+        website_url: access.website_url || '',
+        access_username: access.access_username || '',
+        access_password: access.access_password || '',
+      }))
+    : [{ website_url: '', access_username: '', access_password: '' }]
+
+  const [webAccessRows, setWebAccessRows] = useState(
+    initialWebAccesses.map((access, index) => ({
+      id: index + 1,
+      ...access,
+    }))
+  )
+
+  if (rowIdCounterRef.current <= webAccessRows.length) {
+    rowIdCounterRef.current = webAccessRows.length + 1
+  }
+
   const [state, formAction, isPending] = useActionState(
     async (prevState: any, formData: FormData) => {
       let res;
@@ -30,6 +62,7 @@ export function ProjectForm({ initialData, clients }: ProjectFormProps) {
 
       if (res?.error) return { error: res.error };
       if (res?.success) {
+        notifyAppCountsChanged();
         router.push('/admin/projects');
         return { success: true };
       }
@@ -38,8 +71,26 @@ export function ProjectForm({ initialData, clients }: ProjectFormProps) {
     null
   )
 
+  const addWebAccessRow = () => {
+    const newRowId = rowIdCounterRef.current
+    rowIdCounterRef.current += 1
+    setWebAccessRows((currentRows) => [
+      ...currentRows,
+      { id: newRowId, website_url: '', access_username: '', access_password: '' },
+    ])
+  }
+
+  const removeWebAccessRow = (rowId: number) => {
+    setWebAccessRows((currentRows) => {
+      if (currentRows.length === 1) {
+        return currentRows
+      }
+      return currentRows.filter((row) => row.id !== rowId)
+    })
+  }
+
   return (
-    <Paper variant="outlined" sx={{ p: 4, maxWidth: 700 }}>
+    <Paper variant="outlined" sx={{ p: 4, maxWidth: 860 }}>
       <form action={formAction}>
         <Grid container spacing={3}>
           <Grid size={{ xs: 12 }}>
@@ -68,7 +119,7 @@ export function ProjectForm({ initialData, clients }: ProjectFormProps) {
             >
               {clients.map((client) => (
                 <MenuItem key={client.id} value={client.id}>
-                  {client.name}
+                  {client.name}{client.company ? ` (${client.company})` : ''}
                 </MenuItem>
               ))}
               {clients.length === 0 && (
@@ -118,6 +169,86 @@ export function ProjectForm({ initialData, clients }: ProjectFormProps) {
               fullWidth
               size="small"
             />
+          </Grid>
+
+          <Grid size={{ xs: 12 }}>
+            <Divider sx={{ my: 0.5 }} />
+          </Grid>
+
+          <Grid size={{ xs: 12 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                Accesos Web del Proyecto
+              </Typography>
+              <Button
+                size="small"
+                variant="text"
+                startIcon={<Plus size={16} />}
+                onClick={addWebAccessRow}
+                type="button"
+              >
+                Agregar URL
+              </Button>
+            </Box>
+
+            <Box sx={{ display: 'grid', gap: 1.5 }}>
+              {webAccessRows.map((row, index) => (
+                <Grid container spacing={1.5} key={row.id}>
+                  <Grid size={{ xs: 12, lg: 5 }}>
+                    <TextField
+                      name="web_access_url[]"
+                      label={`URL Web ${index + 1}`}
+                      placeholder="https://midominio.com/wp-admin"
+                      type="url"
+                      defaultValue={row.website_url}
+                      fullWidth
+                      size="small"
+                      slotProps={{
+                        input: {
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <Link2 size={14} />
+                            </InputAdornment>
+                          ),
+                        },
+                      }}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, lg: 3 }}>
+                    <TextField
+                      name="web_access_username[]"
+                      label="Usuario de Acceso"
+                      placeholder="admin"
+                      defaultValue={row.access_username}
+                      fullWidth
+                      size="small"
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, lg: 3 }}>
+                    <TextField
+                      name="web_access_password[]"
+                      label="Contraseña de Acceso"
+                      placeholder="********"
+                      defaultValue={row.access_password}
+                      fullWidth
+                      size="small"
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, lg: 1 }}>
+                    <Box sx={{ display: 'flex', justifyContent: { xs: 'flex-end', lg: 'center' }, pt: { lg: 0.4 } }}>
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => removeWebAccessRow(row.id)}
+                        disabled={webAccessRows.length === 1}
+                      >
+                        <Trash2 size={16} />
+                      </IconButton>
+                    </Box>
+                  </Grid>
+                </Grid>
+              ))}
+            </Box>
           </Grid>
         </Grid>
 

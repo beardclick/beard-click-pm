@@ -10,6 +10,7 @@ import Button from '@mui/material/Button'
 import Paper from '@mui/material/Paper'
 import Grid from '@mui/material/Grid'
 import Alert from '@mui/material/Alert'
+import { notifyAppCountsChanged } from '@/lib/client-events'
 
 interface ClientFormProps {
   initialData?: any;
@@ -28,6 +29,7 @@ export function ClientForm({ initialData }: ClientFormProps) {
 
       if (res?.error) return { error: res.error };
       if (res?.success) {
+        notifyAppCountsChanged();
         router.push('/admin/clients');
         return { success: true };
       }
@@ -44,8 +46,8 @@ export function ClientForm({ initialData }: ClientFormProps) {
             <TextField
               id="name"
               name="name"
-              label="Nombre de la Empresa / Cliente"
-              placeholder="Ej. Acme Corp"
+              label="Nombre del Cliente"
+              placeholder="Ej. Juan Pérez"
               defaultValue={initialData?.name || ''}
               required
               fullWidth
@@ -54,12 +56,11 @@ export function ClientForm({ initialData }: ClientFormProps) {
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
             <TextField
-              id="email"
-              name="email"
-              label="Correo Electrónico"
-              type="email"
-              placeholder="contacto@empresa.com"
-              defaultValue={initialData?.email || ''}
+              id="company"
+              name="company"
+              label="Negocio / Empresa"
+              placeholder="Ej. Beard Click"
+              defaultValue={initialData?.company || ''}
               required
               fullWidth
               size="small"
@@ -78,24 +79,12 @@ export function ClientForm({ initialData }: ClientFormProps) {
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
             <TextField
-              id="company"
-              name="company"
-              label="Razón Social / Compañía"
-              placeholder="Opcional"
-              defaultValue={initialData?.company || ''}
-              fullWidth
-              size="small"
-            />
-          </Grid>
-          <Grid size={{ xs: 12 }}>
-            <TextField
-              id="notes"
-              name="notes"
-              label="Notas o Descripción"
-              placeholder="Información adicional sobre el cliente..."
-              defaultValue={initialData?.notes || ''}
-              multiline
-              rows={4}
+              id="email"
+              name="email"
+              label="Correo Electrónico"
+              type="email"
+              placeholder="contacto@empresa.com"
+              defaultValue={initialData?.email || ''}
               fullWidth
               size="small"
             />

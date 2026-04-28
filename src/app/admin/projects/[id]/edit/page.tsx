@@ -1,5 +1,5 @@
 import { getClients } from "@/app/actions/clients";
-import { getProject } from "@/app/actions/projects";
+import { getProject, getProjectWebAccesses } from "@/app/actions/projects";
 import { ProjectForm } from "@/components/projects/ProjectForm";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
@@ -15,9 +15,10 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
   if (!project) {
     notFound();
   }
+  const webAccesses = await getProjectWebAccesses(project.id);
 
   const clients = await getClients();
-  const clientsForSelect = clients.map(c => ({ id: c.id, name: c.name }));
+  const clientsForSelect = clients.map(c => ({ id: c.id, name: c.name, company: c.company }));
 
   return (
     <Box>
@@ -35,7 +36,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
         </Box>
       </Box>
 
-      <ProjectForm initialData={project} clients={clientsForSelect} />
+      <ProjectForm initialData={{ ...project, web_accesses: webAccesses }} clients={clientsForSelect} />
     </Box>
   );
 }

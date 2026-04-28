@@ -8,7 +8,7 @@ import IconButton from "@mui/material/IconButton";
 
 export default async function NewProjectPage() {
   const clients = await getClients();
-  const clientsForSelect = clients.map(c => ({ id: c.id, name: c.name }));
+  const clientsForSelect = clients.map(c => ({ id: c.id, name: c.name, company: c.company }));
 
   return (
     <Box>

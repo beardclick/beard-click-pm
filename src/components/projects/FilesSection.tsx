@@ -19,6 +19,7 @@ import InputLabel from '@mui/material/InputLabel'
 import { FileUp, File, Download, Trash2, FileText, ImageIcon, CreditCard, Package } from 'lucide-react'
 import { uploadFileAction, deleteFileAction } from '@/app/actions/files'
 import { createClient } from '@/lib/supabase/client'
+import { notifyAppCountsChanged } from '@/lib/client-events'
 
 const CATEGORIES = [
   { id: 'documentos', label: 'Documentos', icon: FileText, color: '#3b82f6' },
@@ -42,11 +43,11 @@ export function FilesSection({ projectId, initialFiles }: { projectId: string, i
         // Obtener el perfil para saber si es admin
         const { data: profile } = await supabase
           .from('profiles')
-          .select('role')
+          .select('role, full_name')
           .eq('id', user.id)
           .single()
         
-        setCurrentUser({ id: user.id, role: profile?.role })
+        setCurrentUser({ id: user.id, role: profile?.role, fullName: profile?.full_name })
       }
     }
     getUser()
@@ -61,7 +62,7 @@ export function FilesSection({ projectId, initialFiles }: { projectId: string, i
     
     try {
       const fileName = `${Date.now()}-${file.name}`
-      const { data: storageData, error: storageError } = await supabase.storage
+      const { error: storageError } = await supabase.storage
         .from('project-files')
         .upload(`${projectId}/${fileName}`, file)
 
@@ -83,7 +84,14 @@ export function FilesSection({ projectId, initialFiles }: { projectId: string, i
       const result = await uploadFileAction(formData)
       if (result.success) {
         setProgress(100)
-        setTimeout(() => window.location.reload(), 500)
+        setFiles((current) => [
+          {
+            ...result.file,
+            profiles: { full_name: currentUser?.fullName || 'Usuario' },
+          },
+          ...current,
+        ])
+        notifyAppCountsChanged()
       } else {
         alert(`Error: ${result.error}`)
       }
@@ -97,7 +105,10 @@ export function FilesSection({ projectId, initialFiles }: { projectId: string, i
   const handleDelete = async (fileId: string) => {
     if (!confirm('¿Estás seguro de eliminar este archivo?')) return
     const result = await deleteFileAction(fileId, projectId)
-    if (result.success) window.location.reload()
+    if (result.success) {
+      setFiles((current) => current.filter((file) => file.id !== fileId))
+      notifyAppCountsChanged()
+    }
   }
 
   const formatSize = (bytes: number) => {
@@ -114,7 +125,7 @@ export function FilesSection({ projectId, initialFiles }: { projectId: string, i
         Archivos y Entregables
       </Typography>
 
-      <Box sx={{ mb: 3, p: 2, bgcolor: 'grey.50', borderRadius: 2, border: 1, borderColor: 'divider' }}>
+      <Box sx={{ mb: 3, p: 2, bgcolor: 'background.default', borderRadius: 2, border: 1, borderColor: 'divider' }}>
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1, fontWeight: 700 }}>
           CONFIGURAR SUBIDA
         </Typography>
@@ -164,7 +175,7 @@ export function FilesSection({ projectId, initialFiles }: { projectId: string, i
 
           return (
             <Paper key={cat.id} variant="outlined" sx={{ p: 0, overflow: 'hidden' }}>
-              <Box sx={{ bgcolor: `${cat.color}10`, px: 2, py: 1, display: 'flex', alignItems: 'center', gap: 1, borderBottom: 1, borderColor: 'divider' }}>
+              <Box sx={{ bgcolor: `${cat.color}14`, px: 2, py: 1, display: 'flex', alignItems: 'center', gap: 1, borderBottom: 1, borderColor: 'divider' }}>
                 <cat.icon size={16} color={cat.color} />
                 <Typography variant="subtitle2" sx={{ color: cat.color, fontWeight: 700, textTransform: 'uppercase', fontSize: '0.75rem' }}>
                   {cat.label}
@@ -174,7 +185,7 @@ export function FilesSection({ projectId, initialFiles }: { projectId: string, i
               <List disablePadding>
                 {catFiles.map((file, idx) => {
                   // Lógica de permisos para borrar
-                  const canDelete = currentUser?.role === 'admin' || currentUser?.id === file.profile_id;
+                  const canDelete = currentUser?.role === 'admin' || currentUser?.id === file.uploaded_by;
                   
                   return (
                     <ListItem 
@@ -182,7 +193,7 @@ export function FilesSection({ projectId, initialFiles }: { projectId: string, i
                       divider={idx < catFiles.length - 1}
                       secondaryAction={
                         <Box>
-                          <IconButton size="small" component="a" href={file.url} target="_blank">
+                          <IconButton size="small" component="a" href={file.file_path} target="_blank">
                             <Download size={16} />
                           </IconButton>
                           {canDelete && (
@@ -197,8 +208,8 @@ export function FilesSection({ projectId, initialFiles }: { projectId: string, i
                         <File size={20} />
                       </Box>
                       <ListItemText 
-                        primary={file.name}
-                        secondary={`${formatSize(file.size)} • Por ${file.profiles?.full_name}`}
+                        primary={file.file_name}
+                        secondary={`${formatSize(file.file_size)} • Por ${file.profiles?.full_name}`}
                         slotProps={{
                           primary: { variant: 'body2', sx: { fontWeight: 500 } } as any,
                           secondary: { variant: 'caption' } as any
@@ -213,7 +224,7 @@ export function FilesSection({ projectId, initialFiles }: { projectId: string, i
         })}
 
         {files.length === 0 && (
-          <Paper variant="outlined" sx={{ p: 4, textAlign: 'center', borderStyle: 'dashed', bgcolor: 'grey.50' }}>
+          <Paper variant="outlined" sx={{ p: 4, textAlign: 'center', borderStyle: 'dashed', bgcolor: 'background.default' }}>
             <File size={32} style={{ opacity: 0.2, marginBottom: 8 }} />
             <Typography variant="body2" color="text.secondary">
               No hay archivos subidos aún en este proyecto.

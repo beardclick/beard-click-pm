@@ -11,12 +11,13 @@ import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
 import { ArrowLeft, Edit, Calendar, Video, Clock } from "lucide-react";
-import { getProject } from "@/app/actions/projects";
+import { getProject, getProjectMaintenanceLogs, getProjectWebAccesses } from "@/app/actions/projects";
 import { getComments } from "@/app/actions/comments";
 import { getProjectFiles } from "@/app/actions/files";
 import { getProjectMeetings } from "@/app/actions/meetings";
 import { CommentsSection } from "@/components/projects/CommentsSection";
 import { FilesSection } from "@/components/projects/FilesSection";
+import { WebMaintenanceSection } from "@/components/projects/WebMaintenanceSection";
 import { notFound } from "next/navigation";
 
 export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
@@ -25,10 +26,12 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
   
   if (!project) notFound();
 
-  const [comments, files, meetings] = await Promise.all([
+  const [comments, files, meetings, webAccesses, maintenanceLogs] = await Promise.all([
     getComments(id),
     getProjectFiles(id),
-    getProjectMeetings(id)
+    getProjectMeetings(id),
+    getProjectWebAccesses(id),
+    getProjectMaintenanceLogs(id),
   ]);
 
   const statusMap = {
@@ -76,7 +79,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
                 {project.description || "Sin descripción."}
               </Typography>
 
-              <Box sx={{ display: 'flex', gap: 4 }}>
+              <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                 <Box>
                   <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontWeight: 700 }}>
                     FECHA DE ENTREGA
@@ -96,11 +99,30 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
                     {project.clients?.name || "Sin cliente asignado"}
                   </Typography>
                 </Box>
+                <Box sx={{ minWidth: 260, maxWidth: 420 }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontWeight: 700 }}>
+                    ACCESOS WEB
+                  </Typography>
+                  {webAccesses.length === 0 ? (
+                    <Typography variant="body2" sx={{ mt: 0.5, fontWeight: 500 }}>
+                      Sin URLs registradas
+                    </Typography>
+                  ) : (
+                    <Box sx={{ mt: 0.5, display: 'grid', gap: 0.35 }}>
+                      {webAccesses.map((access: any) => (
+                        <Typography key={access.id} variant="body2" sx={{ fontWeight: 500 }}>
+                          {access.website_url} • {access.access_username}
+                        </Typography>
+                      ))}
+                    </Box>
+                  )}
+                </Box>
               </Box>
             </CardContent>
           </Card>
 
           <CommentsSection projectId={id} initialComments={comments} />
+          <WebMaintenanceSection projectId={id} initialLogs={maintenanceLogs} />
         </Grid>
 
         {/* Columna Derecha: Archivos y Reuniones */}

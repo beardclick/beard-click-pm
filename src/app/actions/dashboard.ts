@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function getDashboardStats() {
   const supabase = await createClient()
@@ -62,7 +63,7 @@ export async function getUpcomingMeetings() {
 }
 
 export async function getClientDashboardStats(clientId: string) {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   
   const [projects, meetings] = await Promise.all([
     supabase.from('projects').select('*', { count: 'exact', head: true }).eq('client_id', clientId),
@@ -76,7 +77,7 @@ export async function getClientDashboardStats(clientId: string) {
 }
 
 export async function getClientActivity(clientId: string) {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   
   // Obtenemos actividades relacionadas con los proyectos del cliente
   const { data, error } = await supabase
@@ -99,7 +100,7 @@ export async function getClientActivity(clientId: string) {
 }
 
 export async function getClientUpcomingMeetings(clientId: string) {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   
   const { data, error } = await supabase
     .from('meetings')
@@ -119,4 +120,3 @@ export async function getClientUpcomingMeetings(clientId: string) {
 
   return data
 }
-

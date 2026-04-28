@@ -46,6 +46,31 @@ create table if not exists projects (
   updated_at timestamptz not null default now()
 );
 
+-- Tabla project_web_accesses
+create table if not exists project_web_accesses (
+  id uuid primary key default gen_random_uuid(),
+  project_id uuid not null references projects(id) on delete cascade,
+  website_url text not null,
+  access_username text not null,
+  access_password text not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists idx_project_web_accesses_project_id on project_web_accesses(project_id);
+
+-- Tabla project_maintenance_logs
+create table if not exists project_maintenance_logs (
+  id uuid primary key default gen_random_uuid(),
+  project_id uuid not null references projects(id) on delete cascade,
+  maintenance_date date not null,
+  notes text,
+  created_by uuid references profiles(id) on delete set null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_project_maintenance_logs_project_id on project_maintenance_logs(project_id);
+
 -- Tabla comments
 create table if not exists comments (
   id uuid primary key default gen_random_uuid(),
@@ -180,6 +205,38 @@ create policy "Clients can view own projects" on projects for select using (
     select 1 from clients c where c.id = projects.client_id and c.profile_id = auth.uid()
   )
 );
+
+-- PROJECT_WEB_ACCESSES
+alter table project_web_accesses enable row level security;
+drop policy if exists "Users can view web accesses for accessible projects" on project_web_accesses;
+drop policy if exists "Only admin can insert web accesses" on project_web_accesses;
+drop policy if exists "Only admin can update web accesses" on project_web_accesses;
+drop policy if exists "Only admin can delete web accesses" on project_web_accesses;
+
+create policy "Users can view web accesses for accessible projects" on project_web_accesses
+for select using (public.user_can_access_project(project_id));
+create policy "Only admin can insert web accesses" on project_web_accesses
+for insert with check (public.get_current_user_role() = 'admin');
+create policy "Only admin can update web accesses" on project_web_accesses
+for update using (public.get_current_user_role() = 'admin');
+create policy "Only admin can delete web accesses" on project_web_accesses
+for delete using (public.get_current_user_role() = 'admin');
+
+-- PROJECT_MAINTENANCE_LOGS
+alter table project_maintenance_logs enable row level security;
+drop policy if exists "Users can view maintenance logs for accessible projects" on project_maintenance_logs;
+drop policy if exists "Only admin can insert maintenance logs" on project_maintenance_logs;
+drop policy if exists "Only admin can update maintenance logs" on project_maintenance_logs;
+drop policy if exists "Only admin can delete maintenance logs" on project_maintenance_logs;
+
+create policy "Users can view maintenance logs for accessible projects" on project_maintenance_logs
+for select using (public.user_can_access_project(project_id));
+create policy "Only admin can insert maintenance logs" on project_maintenance_logs
+for insert with check (public.get_current_user_role() = 'admin');
+create policy "Only admin can update maintenance logs" on project_maintenance_logs
+for update using (public.get_current_user_role() = 'admin');
+create policy "Only admin can delete maintenance logs" on project_maintenance_logs
+for delete using (public.get_current_user_role() = 'admin');
 
 -- COMMENTS
 alter table comments enable row level security;

@@ -8,7 +8,8 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { Plus, Video, MapPin, Calendar as CalendarIcon } from "lucide-react";
+import Paper from "@mui/material/Paper";
+import { Plus, Video, MapPin, Calendar as CalendarIcon, Edit } from "lucide-react";
 import Link from "next/link";
 import { getMeetings } from "@/app/actions/meetings";
 import { AutoRead } from "@/components/layout/AutoRead";
@@ -35,15 +36,16 @@ export default async function MeetingsPage() {
         </Link>
       </Box>
 
-      <Card variant="outlined">
-        <TableContainer>
+      <Card variant="outlined" sx={{ bgcolor: "background.paper" }}>
+        <TableContainer component={Paper} elevation={0} sx={{ bgcolor: "transparent" }}>
           <Table>
-            <TableHead sx={{ bgcolor: 'grey.50' }}>
+            <TableHead sx={{ bgcolor: 'background.default' }}>
               <TableRow>
                 <TableCell sx={{ fontWeight: 600 }}>Evento</TableCell>
                 <TableCell sx={{ fontWeight: 600 }}>Proyecto</TableCell>
                 <TableCell sx={{ fontWeight: 600 }}>Fecha y Hora</TableCell>
                 <TableCell sx={{ fontWeight: 600 }}>Ubicación</TableCell>
+                <TableCell sx={{ fontWeight: 600 }} align="right">Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -57,7 +59,9 @@ export default async function MeetingsPage() {
                   <TableCell>{meeting.projects?.name}</TableCell>
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <CalendarIcon size={14} color="gray" />
+                      <Box sx={{ color: 'text.secondary', display: 'flex' }}>
+                        <CalendarIcon size={14} />
+                      </Box>
                       <Typography variant="body2">
                         {new Date(meeting.starts_at).toLocaleString()}
                       </Typography>
@@ -65,7 +69,9 @@ export default async function MeetingsPage() {
                   </TableCell>
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      {meeting.location?.includes('http') ? <Video size={14} /> : <MapPin size={14} />}
+                      <Box sx={{ color: 'text.secondary', display: 'flex' }}>
+                        {meeting.location?.includes('http') ? <Video size={14} /> : <MapPin size={14} />}
+                      </Box>
                       <Typography variant="body2" sx={{ 
                         maxWidth: 200, 
                         overflow: 'hidden', 
@@ -76,10 +82,17 @@ export default async function MeetingsPage() {
                       </Typography>
                     </Box>
                   </TableCell>
+                  <TableCell align="right">
+                    <Link href={`/admin/meetings/${meeting.id}/edit`} style={{ textDecoration: "none" }}>
+                      <Button size="small" variant="outlined" startIcon={<Edit size={16} />}>
+                        Editar
+                      </Button>
+                    </Link>
+                  </TableCell>
                 </TableRow>
               )) : (
                 <TableRow>
-                  <TableCell colSpan={4} align="center" sx={{ py: 4 }}>
+                  <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
                     <Typography variant="body2" color="text.secondary">
                       No hay reuniones agendadas.
                     </Typography>

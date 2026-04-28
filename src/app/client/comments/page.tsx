@@ -9,17 +9,17 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
 import Divider from "@mui/material/Divider";
 import Chip from "@mui/material/Chip";
-import { createClient } from "@/lib/supabase/server";
+import Button from "@mui/material/Button";
 import { getClientGlobalComments } from "@/app/actions/comments";
 import Link from "next/link";
+import { getCurrentClientRecord } from "@/lib/client-access";
 
 export default async function ClientCommentsPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const client = await getCurrentClientRecord();
   
-  if (!user) return null;
+  if (!client) return null;
 
-  const comments = await getClientGlobalComments(user.id);
+  const comments = await getClientGlobalComments(client.id);
 
   return (
     <Box>
@@ -78,6 +78,9 @@ export default async function ClientCommentsPage() {
                 <Typography variant="body1" color="text.secondary">
                   No hay comentarios en tus proyectos aún.
                 </Typography>
+                <Button component={Link} href="/client/projects" variant="outlined" sx={{ mt: 2 }}>
+                  Ir a mis proyectos
+                </Button>
               </Box>
             )}
           </List>

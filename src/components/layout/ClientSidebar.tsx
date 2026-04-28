@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -8,7 +8,6 @@ import {
   Briefcase,
   Calendar,
   MessageSquare,
-  LogOut,
   X,
 } from "lucide-react";
 import Box from "@mui/material/Box";
@@ -23,21 +22,29 @@ import IconButton from "@mui/material/IconButton";
 import Badge from "@mui/material/Badge";
 import { useLayout } from "./LayoutProvider";
 import { getClientSidebarCounts } from "@/app/actions/sidebar";
+import { LogoutListItem } from "./LogoutListItem";
+import { APP_COUNTS_CHANGED_EVENT } from "@/lib/client-events";
 
 export function ClientSidebar() {
   const pathname = usePathname();
   const { isMobileDrawerOpen, toggleMobileDrawer } = useLayout();
   const [counts, setCounts] = useState<any>(null);
 
+  const fetchCounts = useCallback(async () => {
+    const data = await getClientSidebarCounts('current');
+    setCounts(data);
+  }, []);
+
   useEffect(() => {
-    async function fetchCounts() {
-      const data = await getClientSidebarCounts('current'); 
-      setCounts(data);
-    }
     fetchCounts();
     const interval = setInterval(fetchCounts, 60000);
-    return () => clearInterval(interval);
-  }, []);
+    window.addEventListener(APP_COUNTS_CHANGED_EVENT, fetchCounts);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener(APP_COUNTS_CHANGED_EVENT, fetchCounts);
+    };
+  }, [fetchCounts]);
 
   const navItems = [
     { name: "Inicio", href: "/client", icon: Home, countKey: null },
@@ -100,16 +107,22 @@ export function ClientSidebar() {
                         <Badge 
                           badgeContent={countData.total} 
                           showZero
-                          sx={{ 
+                          sx={(theme) => ({ 
                             '& .MuiBadge-badge': { 
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
                               fontSize: '0.65rem', 
                               height: 18, 
                               minWidth: 18,
-                              bgcolor: countData.unread > 0 ? 'error.main' : 'grey.300',
-                              color: countData.unread > 0 ? 'white' : 'text.secondary',
+                              lineHeight: 1,
+                              paddingTop: '1px',
+                              border: `1px solid ${theme.palette.divider}`,
+                              bgcolor: countData.unread > 0 ? theme.palette.error.main : theme.palette.background.default,
+                              color: countData.unread > 0 ? theme.palette.error.contrastText : theme.palette.text.primary,
                               transition: 'all 0.3s ease'
                             } 
-                          }}
+                          })}
                         />
                       )}
                     </Box>
@@ -124,25 +137,7 @@ export function ClientSidebar() {
       {/* Logout */}
       <Divider />
       <Box sx={{ p: 1 }}>
-        <ListItemButton
-          sx={{
-            borderRadius: 1.5,
-            "&:hover": { bgcolor: "#fef2f2", color: "#b91c1c" },
-            "& .MuiListItemIcon-root": { color: "text.secondary" },
-            "&:hover .MuiListItemIcon-root": { color: "#b91c1c" },
-          }}
-        >
-          <ListItemIcon sx={{ minWidth: 40 }}>
-            <LogOut size={20} />
-          </ListItemIcon>
-          <ListItemText 
-            primary={
-              <Typography sx={{ fontSize: "0.875rem", fontWeight: 500 }}>
-                Cerrar Sesión
-              </Typography>
-            } 
-          />
-        </ListItemButton>
+        <LogoutListItem onAfterLogout={() => toggleMobileDrawer(false)} />
       </Box>
     </Box>
   );

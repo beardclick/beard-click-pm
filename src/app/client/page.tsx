@@ -11,23 +11,22 @@ import Avatar from "@mui/material/Avatar";
 import Divider from "@mui/material/Divider";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
 import { 
   getClientDashboardStats, 
   getClientActivity, 
   getClientUpcomingMeetings 
 } from "@/app/actions/dashboard";
+import { getCurrentClientRecord } from "@/lib/client-access";
 
 export default async function ClientDashboardPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const client = await getCurrentClientRecord();
   
-  if (!user) return null;
+  if (!client) return null;
 
   const [stats, activities, meetings] = await Promise.all([
-    getClientDashboardStats(user.id),
-    getClientActivity(user.id),
-    getClientUpcomingMeetings(user.id)
+    getClientDashboardStats(client.id),
+    getClientActivity(client.id),
+    getClientUpcomingMeetings(client.id)
   ]);
 
   const getActivityLink = (activity: any) => {
@@ -43,25 +42,25 @@ export default async function ClientDashboardPage() {
       </Typography>
 
       <Grid container spacing={3} sx={{ mt: 1 }}>
-        <Grid size={{ xs: 12, sm: 6 }}>
+        <Grid size={{ xs: 6, sm: 6 }}>
           <Card variant="outlined">
-            <CardContent>
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
               <Typography variant="body2" color="text.secondary" sx={{fontWeight: 500}}>
                 Mis Proyectos Activos
               </Typography>
-              <Typography variant="h3" sx={{ mt: 1, color: "primary.main" , fontWeight: 700}} >
+              <Typography variant="h3" sx={{ mt: 1, color: "primary.main" , fontWeight: 700, fontSize: { xs: '1.8rem', sm: '3rem' }, lineHeight: 1.1 }} >
                 {stats.activeProjects}
               </Typography>
             </CardContent>
           </Card>
         </Grid>
-        <Grid size={{ xs: 12, sm: 6 }}>
+        <Grid size={{ xs: 6, sm: 6 }}>
           <Card variant="outlined">
-            <CardContent>
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
               <Typography variant="body2" color="text.secondary" sx={{fontWeight: 500}}>
                 Próximas Reuniones
               </Typography>
-              <Typography variant="h3" sx={{ mt: 1, color: "secondary.main" , fontWeight: 700}} >
+              <Typography variant="h3" sx={{ mt: 1, color: "secondary.main" , fontWeight: 700, fontSize: { xs: '1.8rem', sm: '3rem' }, lineHeight: 1.1 }} >
                 {stats.upcomingMeetings}
               </Typography>
             </CardContent>

@@ -1,15 +1,16 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { notifyAdminsForProjectEvent, notifyClientForProjectEvent } from '@/lib/notifications'
 import { revalidatePath } from 'next/cache'
 
 export async function getProjectFiles(projectId: string) {
   const supabase = await createClient()
   const { data, error } = await supabase
-    .from('files')
+    .from('project_files')
     .select(`
       *,
-      profiles (full_name)
+      profiles:uploaded_by (full_name)
     `)
     .eq('project_id', projectId)
     .order('created_at', { ascending: false })
@@ -27,6 +28,12 @@ export async function uploadFileAction(formData: FormData) {
 
   if (!user) return { error: 'No autorizado' }
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle()
+
   const projectId = formData.get('projectId') as string
   const category = formData.get('category') as string || 'documentos'
   const name = formData.get('name') as string
@@ -36,15 +43,14 @@ export async function uploadFileAction(formData: FormData) {
   const size = sizeStr ? parseInt(sizeStr) : 0
 
   const { data, error } = await supabase
-    .from('files')
+    .from('project_files')
     .insert([{
       project_id: projectId,
-      profile_id: user.id,
-      name,
-      url,
-      category,
-      type,
-      size
+      uploaded_by: user.id,
+      file_name: name,
+      file_path: url,
+      file_type: type,
+      file_size: size
     }])
     .select()
 
@@ -53,14 +59,28 @@ export async function uploadFileAction(formData: FormData) {
     return { error: `Error DB: ${error.message}` }
   }
 
+  const notificationPayload = {
+    projectId,
+    actorId: user.id,
+    type: 'file_uploaded' as const,
+    title: 'Nuevo archivo subido',
+    message: name,
+  }
+
+  if (profile?.role === 'admin') {
+    await notifyClientForProjectEvent(notificationPayload)
+  } else {
+    await notifyAdminsForProjectEvent(notificationPayload)
+  }
+
   // Registrar en log de actividad
   try {
     await supabase.from('activity_logs').insert([{
-      profile_id: user.id,
+      actor_id: user.id,
       project_id: projectId,
       title: 'Archivo subido',
       description: `subió un archivo: ${name}`,
-      type: 'file'
+      type: 'file_uploaded'
     }])
   } catch (e) {
     console.error('Non-critical: Error creating activity log for file')
@@ -68,6 +88,10 @@ export async function uploadFileAction(formData: FormData) {
 
   revalidatePath(`/admin/projects/${projectId}`)
   revalidatePath(`/client/projects/${projectId}`)
+  revalidatePath('/admin/projects')
+  revalidatePath('/client/projects')
+  revalidatePath('/admin')
+  revalidatePath('/client')
   
   return { success: true, file: data[0] }
 }
@@ -75,12 +99,17 @@ export async function uploadFileAction(formData: FormData) {
 export async function deleteFileAction(fileId: string, projectId: string) {
   const supabase = await createClient()
   const { error } = await supabase
-    .from('files')
+    .from('project_files')
     .delete()
     .eq('id', fileId)
 
   if (error) return { error: 'Error al eliminar' }
 
   revalidatePath(`/admin/projects/${projectId}`)
+  revalidatePath(`/client/projects/${projectId}`)
+  revalidatePath('/admin/projects')
+  revalidatePath('/client/projects')
+  revalidatePath('/admin')
+  revalidatePath('/client')
   return { success: true }
 }

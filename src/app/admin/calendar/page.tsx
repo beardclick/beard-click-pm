@@ -15,8 +15,10 @@ import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import IconButton from "@mui/material/IconButton";
-import { Video, Clock, X } from "lucide-react";
-import { getUpcomingMeetings } from "@/app/actions/dashboard";
+import { alpha, useTheme } from "@mui/material/styles";
+import { ChevronLeft, ChevronRight, Video, Clock, X, Pencil } from "lucide-react";
+import Link from "next/link";
+import { getMeetings } from "@/app/actions/meetings";
 
 dayjs.locale("es");
 const localizer = dayjsLocalizer(dayjs);
@@ -33,13 +35,33 @@ const EventComponent = ({ event }: any) => (
   </Box>
 );
 
+const ToolbarComponent = ({ label, onNavigate }: any) => (
+  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2, gap: 1, flexWrap: "wrap" }}>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      <IconButton size="small" onClick={() => onNavigate("PREV")}>
+        <ChevronLeft size={18} />
+      </IconButton>
+      <Typography variant="h6" sx={{ fontWeight: 700, minWidth: 180 }}>
+        {label}
+      </Typography>
+      <IconButton size="small" onClick={() => onNavigate("NEXT")}>
+        <ChevronRight size={18} />
+      </IconButton>
+    </Box>
+    <Button size="small" variant="outlined" onClick={() => onNavigate("TODAY")}>
+      Hoy
+    </Button>
+  </Box>
+)
+
 export default function AdminCalendarPage() {
+  const theme = useTheme();
   const [events, setEvents] = useState<any[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
 
   useEffect(() => {
     async function loadMeetings() {
-      const meetings = await getUpcomingMeetings();
+      const meetings = await getMeetings();
       const formattedEvents = meetings.map((m: any) => ({
         id: m.id,
         title: m.title,
@@ -62,7 +84,81 @@ export default function AdminCalendarPage() {
         Calendario de Reuniones
       </Typography>
       
-      <Paper variant="outlined" sx={{ height: "100%", p: 2 }}>
+      <Paper
+        variant="outlined"
+        sx={{
+          height: "100%",
+          p: 2,
+          bgcolor: "background.paper",
+          '& .rbc-toolbar button': {
+            color: 'text.primary',
+            borderColor: 'divider',
+            backgroundColor: 'background.paper',
+          },
+          '& .rbc-toolbar button:hover, & .rbc-toolbar button:focus': {
+            backgroundColor: 'action.hover',
+          },
+          '& .rbc-toolbar button.rbc-active': {
+            backgroundColor: 'primary.main',
+            color: 'primary.contrastText',
+            borderColor: 'primary.main',
+          },
+          '& .rbc-toolbar-label': {
+            color: 'text.primary',
+            fontWeight: 700,
+          },
+          '& .rbc-btn-group button + button': {
+            borderLeftColor: `${theme.palette.divider} !important`,
+          },
+          '& .rbc-month-view, & .rbc-time-view, & .rbc-agenda-view': {
+            borderColor: 'divider',
+            color: 'text.primary',
+          },
+          '& .rbc-header': {
+            color: 'text.secondary',
+            backgroundColor: 'background.default',
+            borderColor: 'divider',
+            fontWeight: 700,
+            padding: '8px 4px',
+          },
+          '& .rbc-date-cell, & .rbc-label, & .rbc-time-header-content, & .rbc-time-gutter': {
+            color: 'text.secondary',
+          },
+          '& .rbc-date-cell > a, & .rbc-row-content .rbc-button-link': {
+            color: theme.palette.text.secondary,
+          },
+          '& .rbc-off-range-bg': {
+            backgroundColor: theme.palette.mode === 'dark' ? alpha(theme.palette.common.white, 0.03) : '#f8fafc',
+          },
+          '& .rbc-off-range, & .rbc-off-range .rbc-button-link': {
+            color: theme.palette.mode === 'dark' ? alpha(theme.palette.text.secondary, 0.75) : theme.palette.text.secondary,
+          },
+          '& .rbc-today': {
+            backgroundColor: alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.12 : 0.08),
+          },
+          '& .rbc-timeslot-group, & .rbc-time-content, & .rbc-time-header-content, & .rbc-day-bg, & .rbc-month-row, & .rbc-row-bg, & .rbc-header + .rbc-header, & .rbc-agenda-view table.rbc-agenda-table, & .rbc-agenda-view table.rbc-agenda-table tbody > tr > td': {
+            borderColor: `${theme.palette.divider} !important`,
+          },
+          '& .rbc-time-view .rbc-allday-cell, & .rbc-agenda-view table.rbc-agenda-table thead > tr > th': {
+            backgroundColor: theme.palette.background.default,
+            color: theme.palette.text.secondary,
+            borderColor: `${theme.palette.divider} !important`,
+          },
+          '& .rbc-time-slot': {
+            color: theme.palette.text.secondary,
+          },
+          '& .rbc-agenda-view table.rbc-agenda-table tbody > tr:hover': {
+            backgroundColor: theme.palette.action.hover,
+          },
+          '& .rbc-current-time-indicator': {
+            backgroundColor: 'error.main',
+          },
+          '& .rbc-show-more': {
+            color: 'primary.main',
+            backgroundColor: 'transparent',
+          },
+        }}
+      >
         <Calendar
           localizer={localizer}
           events={events}
@@ -79,9 +175,23 @@ export default function AdminCalendarPage() {
           culture="es"
           onSelectEvent={handleSelectEvent}
           components={{
-            event: EventComponent
+            event: EventComponent,
+            toolbar: ToolbarComponent,
           }}
           style={{ height: "100%" }}
+          eventPropGetter={() => ({
+            style: {
+              backgroundColor: alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.32 : 0.14),
+              color: theme.palette.text.primary,
+              border: `1px solid ${alpha(theme.palette.primary.main, 0.45)}`,
+              borderRadius: '8px',
+            },
+          })}
+          dayPropGetter={() => ({
+            style: {
+              backgroundColor: theme.palette.background.paper,
+            },
+          })}
         />
       </Paper>
 
@@ -111,7 +221,9 @@ export default function AdminCalendarPage() {
               </Box>
 
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Clock size={20} color="#64748b" />
+                <Box sx={{ color: 'text.secondary', display: 'flex' }}>
+                  <Clock size={20} />
+                </Box>
                 <Box>
                   <Typography variant="body2" sx={{ fontWeight: 600 }}>
                     {dayjs(selectedEvent.starts_at).format('dddd, D [de] MMMM [de] YYYY')}
@@ -123,8 +235,19 @@ export default function AdminCalendarPage() {
               </Box>
 
               {selectedEvent.meeting_url && (
-                <Box sx={{ p: 2, bgcolor: 'primary.light', borderRadius: 2, border: 1, borderColor: 'primary.main' }}>
-                  <Typography variant="subtitle2" color="primary.dark" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    border: 1,
+                    borderColor: alpha(theme.palette.primary.main, 0.45),
+                    bgcolor: alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.14 : 0.08),
+                  }}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1, color: 'text.primary' }}
+                  >
                     <Video size={16} /> Enlace de la reunión
                   </Typography>
                   <Button 
@@ -143,6 +266,16 @@ export default function AdminCalendarPage() {
           )}
         </DialogContent>
         <DialogActions>
+          {selectedEvent && (
+            <Button
+              component={Link}
+              href={`/admin/meetings/${selectedEvent.id}/edit`}
+              variant="outlined"
+              startIcon={<Pencil size={16} />}
+            >
+              Editar
+            </Button>
+          )}
           <Button onClick={() => setSelectedEvent(null)}>Cerrar</Button>
         </DialogActions>
       </Dialog>

@@ -1,8 +1,10 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { canSendTransactionalEmail, sendPasswordResetEmail } from '@/lib/portal-access-email'
 
 export async function login(formData: FormData) {
   const supabase = await createClient()
@@ -55,4 +57,53 @@ export async function logout() {
   const supabase = await createClient()
   await supabase.auth.signOut()
   redirect('/login')
+}
+
+export async function requestPasswordReset(formData: FormData) {
+  const email = (formData.get('email') as string)?.trim().toLowerCase()
+
+  if (!email) {
+    return { error: 'Ingresa tu correo para enviarte el enlace de recuperación.' }
+  }
+
+  const headerStore = await headers()
+  const origin =
+    headerStore.get('origin') ||
+    (headerStore.get('host') ? `https://${headerStore.get('host')}` : 'https://portal.beardclick.com')
+
+  if (!canSendTransactionalEmail()) {
+    return {
+      error: 'Brevo no esta configurado. Define BREVO_API_KEY y PORTAL_EMAIL_FROM para enviar recuperaciones.',
+    }
+  }
+
+  const adminSupabase = createAdminClient()
+  const { data: linkData, error: linkError } = await adminSupabase.auth.admin.generateLink({
+    type: 'recovery',
+    email,
+    options: {
+      redirectTo: `${origin}/reset-password`,
+    },
+  })
+
+  if (linkError || !linkData.properties?.action_link) {
+    console.error('Error generating password reset link:', linkError)
+    return { error: 'No se pudo generar el enlace de recuperación.' }
+  }
+
+  const emailResult = await sendPasswordResetEmail({
+    to: email,
+    resetLink: linkData.properties.action_link,
+    portalUrl: origin,
+  })
+
+  if (!emailResult.success) {
+    console.error('Error sending password reset email via Brevo:', emailResult.error)
+    return { error: 'No se pudo enviar el correo de recuperación.' }
+  }
+
+  return {
+    success: true,
+    message: 'Te enviamos un correo con el enlace para restablecer tu contraseña.',
+  }
 }

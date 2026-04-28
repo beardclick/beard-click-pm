@@ -47,20 +47,20 @@ export default async function AdminDashboardPage() {
       {/* Stats Cards */}
       <Grid container spacing={3} sx={{ mt: 1 }}>
         {cards.map((card) => (
-          <Grid key={card.label} size={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid key={card.label} size={{ xs: 6, sm: 6, md: 3 }}>
             <Card variant="outlined" sx={{ height: '100%' }}>
-              <CardContent>
+              <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <Box>
                     <Typography variant="body2" color="text.secondary" sx={{fontWeight: 500}}>
                       {card.label}
                     </Typography>
-                    <Typography variant="h3" sx={{ mt: 1, color: card.color , fontWeight: 700}} >
+                    <Typography variant="h3" sx={{ mt: 1, color: card.color , fontWeight: 700, fontSize: { xs: '1.8rem', sm: '3rem' }, lineHeight: 1.1 }} >
                       {card.value}
                     </Typography>
                   </Box>
-                  <Box sx={{ p: 1, borderRadius: 2, bgcolor: `${card.color}10`, color: card.color }}>
-                    <card.icon size={24} />
+                  <Box sx={{ p: { xs: 0.75, sm: 1 }, borderRadius: 2, bgcolor: `${card.color}10`, color: card.color }}>
+                    <card.icon size={20} />
                   </Box>
                 </Box>
               </CardContent>

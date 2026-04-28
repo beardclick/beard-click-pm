@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { notifyAdminsForProjectEvent, notifyClientForProjectEvent } from '@/lib/notifications'
 import { revalidatePath } from 'next/cache'
 
 export async function getComments(projectId: string) {
@@ -27,12 +28,18 @@ export async function createCommentAction(projectId: string, content: string) {
 
   if (!user || !content) return { error: 'No autorizado o contenido vacío' }
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role, full_name')
+    .eq('id', user.id)
+    .maybeSingle()
+
   // 1. Insertar el comentario
   const { data: comment, error: commentError } = await supabase
     .from('comments')
     .insert([{
       project_id: projectId,
-      profile_id: user.id,
+      author_id: user.id,
       content
     }])
     .select()
@@ -43,18 +50,67 @@ export async function createCommentAction(projectId: string, content: string) {
     return { error: 'Error al publicar comentario' }
   }
 
+  const notificationPayload = {
+    projectId,
+    actorId: user.id,
+    type: 'comment_added' as const,
+    title: 'Nuevo comentario',
+    message: content,
+    relatedCommentId: comment.id,
+  }
+
+  if (profile?.role === 'admin') {
+    await notifyClientForProjectEvent(notificationPayload)
+  } else {
+    await notifyAdminsForProjectEvent(notificationPayload)
+  }
+
   // 2. Registrar en log de actividad
   await supabase.from('activity_logs').insert([{
-    profile_id: user.id,
+    actor_id: user.id,
     project_id: projectId,
     title: 'Nuevo comentario',
     description: `comentó en el proyecto`,
-    type: 'comment'
+    type: 'comment_added'
   }])
 
   revalidatePath(`/admin/projects/${projectId}`)
   revalidatePath(`/client/projects/${projectId}`)
+  revalidatePath('/admin/comments')
+  revalidatePath('/client/comments')
+  revalidatePath('/admin')
+  revalidatePath('/client')
   return { success: true, comment }
+}
+
+export async function deleteCommentAction(commentId: string, projectId: string) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'No autorizado' }
+  }
+
+  const { error } = await supabase
+    .from('comments')
+    .delete()
+    .eq('id', commentId)
+
+  if (error) {
+    console.error('Error deleting comment:', error)
+    return { error: 'No se pudo eliminar el comentario' }
+  }
+
+  revalidatePath(`/admin/projects/${projectId}`)
+  revalidatePath(`/client/projects/${projectId}`)
+  revalidatePath('/admin/comments')
+  revalidatePath('/client/comments')
+  revalidatePath('/admin')
+  revalidatePath('/client')
+
+  return { success: true }
 }
 
 export async function getGlobalComments() {
@@ -95,4 +151,3 @@ export async function getClientGlobalComments(clientId: string) {
   }
   return data
 }
-

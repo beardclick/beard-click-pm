@@ -1,17 +1,19 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
+import Button from "@mui/material/Button";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import IconButton from "@mui/material/IconButton";
 import Link from "next/link";
-import { Eye, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 import Chip from "@mui/material/Chip";
-import { getProjects } from "@/app/actions/projects";
+import { getClientProjects } from "@/app/actions/projects";
+import { getCurrentClientRecord } from "@/lib/client-access";
+import { CopyProjectUrlButton } from "@/components/projects/CopyProjectUrlButton";
 
 const statusColor: Record<string, "success" | "warning" | "default" | "error" | "primary"> = {
   "active": "success",
@@ -26,7 +28,10 @@ const statusLabel: Record<string, string> = {
 };
 
 export default async function ClientProjectsPage() {
-  const projects = await getProjects();
+  const client = await getCurrentClientRecord();
+  if (!client) return null;
+
+  const projects = await getClientProjects(client.id);
 
   return (
     <Box>
@@ -40,9 +45,11 @@ export default async function ClientProjectsPage() {
       <Card variant="outlined">
         <TableContainer>
           <Table>
-            <TableHead sx={{ bgcolor: "grey.50" }}>
+            <TableHead sx={{ bgcolor: "background.default" }}>
               <TableRow>
                 <TableCell sx={{ fontWeight: 600 }}>Nombre del Proyecto</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>URL</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Plan Mantenimiento</TableCell>
                 <TableCell sx={{ fontWeight: 600 }}>Estado</TableCell>
                 <TableCell sx={{ fontWeight: 600 }}>Fecha de Inicio</TableCell>
                 <TableCell sx={{ fontWeight: 600 }} align="center">Archivos</TableCell>
@@ -54,6 +61,43 @@ export default async function ClientProjectsPage() {
                 <TableRow key={project.id} hover>
                   <TableCell>
                     <Typography variant="body2" sx={{fontWeight: 600}}>{project.name}</Typography>
+                  </TableCell>
+                  <TableCell sx={{ minWidth: 250 }}>
+                    {project.primary_website_url ? (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Box sx={{ minWidth: 0, flex: 1 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>
+                            {project.primary_website_url}
+                          </Typography>
+                          {project.website_urls_count > 1 && (
+                            <Typography variant="caption" color="text.secondary">
+                              +{project.website_urls_count - 1} URL(s)
+                            </Typography>
+                          )}
+                        </Box>
+                        <CopyProjectUrlButton url={project.primary_website_url} />
+                      </Box>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        Sin URL
+                      </Typography>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {project.maintenance_plan_active ? (
+                      <Box>
+                        <Typography variant="body2" sx={{ color: "primary.main", fontWeight: 700 }}>
+                          ACTIVO
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          Vence: {new Date(`${project.maintenance_plan_expires_at}T00:00:00`).toLocaleDateString()}
+                        </Typography>
+                      </Box>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        No
+                      </Typography>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Chip 
@@ -74,17 +118,17 @@ export default async function ClientProjectsPage() {
                     </Box>
                   </TableCell>
                   <TableCell align="right">
-                    <Link href={`/client/projects/${project.id}`}>
-                      <IconButton size="small" color="primary">
-                        <Eye size={18} />
-                      </IconButton>
+                    <Link href={`/client/projects/${project.id}`} style={{ textDecoration: 'none' }}>
+                      <Button size="small" variant="outlined" color="primary">
+                        Ver Proyecto
+                      </Button>
                     </Link>
                   </TableCell>
                 </TableRow>
               ))}
               {projects.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                  <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
                     <Typography variant="body2" color="text.secondary">
                       Aún no tienes proyectos asignados.
                     </Typography>

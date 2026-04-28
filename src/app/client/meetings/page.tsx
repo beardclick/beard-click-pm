@@ -8,16 +8,16 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Chip from "@mui/material/Chip";
-import { createClient } from "@/lib/supabase/server";
+import Link from "@mui/material/Link";
 import { getClientMeetings } from "@/app/actions/meetings";
+import { getCurrentClientRecord } from "@/lib/client-access";
 
 export default async function ClientMeetingsPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const client = await getCurrentClientRecord();
   
-  if (!user) return null;
+  if (!client) return null;
 
-  const meetings = await getClientMeetings(user.id);
+  const meetings = await getClientMeetings(client.id);
 
   return (
     <Box>
@@ -27,7 +27,7 @@ export default async function ClientMeetingsPage() {
 
       <TableContainer component={Paper} variant="outlined">
         <Table>
-          <TableHead sx={{ bgcolor: 'grey.50' }}>
+          <TableHead sx={{ bgcolor: 'background.default' }}>
             <TableRow>
               <TableCell sx={{ fontWeight: 600 }}>Título</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Proyecto</TableCell>
@@ -59,14 +59,16 @@ export default async function ClientMeetingsPage() {
                   </TableCell>
                   <TableCell align="right">
                     {meeting.location && meeting.location.startsWith('http') ? (
-                      <a 
+                      <Link
                         href={meeting.location} 
                         target="_blank" 
                         rel="noreferrer" 
-                        style={{ color: '#2563eb', fontWeight: 500, fontSize: '0.875rem', textDecoration: 'none' }}
+                        underline="hover"
+                        color="primary.main"
+                        sx={{ fontWeight: 500, fontSize: '0.875rem' }}
                       >
                         Unirse
-                      </a>
+                      </Link>
                     ) : (
                       <Typography variant="caption" color="text.secondary">Ver detalles</Typography>
                     )}

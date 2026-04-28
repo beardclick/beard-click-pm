@@ -10,7 +10,8 @@ import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack'
 import { useRouter } from 'next/navigation'
-import { createMeetingAction } from '@/app/actions/meetings'
+import { createMeetingAction, updateMeetingAction } from '@/app/actions/meetings'
+import { notifyAppCountsChanged } from '@/lib/client-events'
 import { Video, Save, X } from 'lucide-react'
 
 interface Project {
@@ -20,9 +21,26 @@ interface Project {
 
 interface MeetingFormProps {
   projects: Project[]
+  initialData?: {
+    id: string
+    title: string
+    project_id: string
+    starts_at: string
+    ends_at?: string | null
+    location?: string | null
+  }
 }
 
-export function MeetingForm({ projects }: MeetingFormProps) {
+function toLocalDatetime(value?: string | null) {
+  if (!value) return ''
+
+  const date = new Date(value)
+  const offset = date.getTimezoneOffset()
+  const localDate = new Date(date.getTime() - offset * 60000)
+  return localDate.toISOString().slice(0, 16)
+}
+
+export function MeetingForm({ projects, initialData }: MeetingFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -33,12 +51,15 @@ export function MeetingForm({ projects }: MeetingFormProps) {
     setError('')
 
     const formData = new FormData(e.currentTarget)
-    const result = await createMeetingAction(formData)
+    const result = initialData
+      ? await updateMeetingAction(initialData.id, formData)
+      : await createMeetingAction(formData)
 
     if (result.error) {
       setError(result.error)
       setLoading(false)
     } else {
+      notifyAppCountsChanged()
       router.push('/admin/meetings')
     }
   }
@@ -55,6 +76,7 @@ export function MeetingForm({ projects }: MeetingFormProps) {
               fullWidth
               required
               variant="outlined"
+              defaultValue={initialData?.title || ''}
             />
 
             <TextField
@@ -63,7 +85,7 @@ export function MeetingForm({ projects }: MeetingFormProps) {
               label="Proyecto Relacionado"
               fullWidth
               required
-              defaultValue={projects.length > 0 ? projects[0].id : ""}
+              defaultValue={initialData?.project_id || (projects.length > 0 ? projects[0].id : "")}
               error={projects.length === 0}
               helperText={projects.length === 0 ? "Primero debes crear un proyecto" : ""}
             >
@@ -85,6 +107,16 @@ export function MeetingForm({ projects }: MeetingFormProps) {
               required
               slotProps={{ inputLabel: { shrink: true } }}
               helperText="Duración estimada: 1 hora"
+              defaultValue={toLocalDatetime(initialData?.starts_at)}
+            />
+
+            <TextField
+              name="ends_at"
+              label="Fecha y Hora de Fin"
+              type="datetime-local"
+              fullWidth
+              slotProps={{ inputLabel: { shrink: true } }}
+              defaultValue={toLocalDatetime(initialData?.ends_at)}
             />
 
             <TextField
@@ -92,6 +124,7 @@ export function MeetingForm({ projects }: MeetingFormProps) {
               label="Enlace o Ubicación"
               placeholder="Ej: https://meet.google.com/xxx"
               fullWidth
+              defaultValue={initialData?.location || ''}
               slotProps={{
                 input: {
                   startAdornment: (
@@ -126,7 +159,7 @@ export function MeetingForm({ projects }: MeetingFormProps) {
                 disabled={loading}
                 startIcon={<Save size={18} />}
               >
-                {loading ? 'Agendando...' : 'Agendar'}
+                {loading ? (initialData ? 'Guardando...' : 'Agendando...') : (initialData ? 'Guardar Cambios' : 'Agendar')}
               </Button>
             </Box>
           </Stack>

@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { notifyClientForProjectEvent } from '@/lib/notifications'
 import { revalidatePath } from 'next/cache'
 
 export async function getMeetings() {
@@ -15,6 +16,18 @@ export async function getMeetings() {
 
   if (error) return []
   return data || []
+}
+
+export async function getMeeting(id: string) {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('meetings')
+    .select('*')
+    .eq('id', id)
+    .single()
+
+  if (error) return null
+  return data
 }
 
 export async function getClientMeetings(clientId: string) {
@@ -67,7 +80,8 @@ export async function createMeetingAction(formData: FormData) {
       project_id,
       starts_at,
       ends_at: final_ends_at,
-      location: location || null
+      location: location || null,
+      created_by: user.id,
     }])
     .select()
     .single()
@@ -77,18 +91,89 @@ export async function createMeetingAction(formData: FormData) {
     return { error: 'No se pudo agendar la reunión' }
   }
 
+  await notifyClientForProjectEvent({
+    projectId: project_id,
+    actorId: user.id,
+    type: 'meeting_created',
+    title: 'Nueva reunión agendada',
+    message: title,
+    relatedMeetingId: data.id,
+  })
+
   // Log de actividad
   await supabase.from('activity_logs').insert([{
-    profile_id: user.id,
+    actor_id: user.id,
     project_id,
     title: 'Nueva reunión agendada',
     description: `agendó "${title}"`,
-    type: 'meeting'
+    type: 'meeting_created'
   }])
 
   revalidatePath('/admin/meetings')
+  revalidatePath('/client/meetings')
   revalidatePath('/admin/calendar')
   revalidatePath('/admin')
+  revalidatePath('/client')
+  return { success: true, data }
+}
+
+export async function updateMeetingAction(id: string, formData: FormData) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  const title = formData.get('title') as string
+  const project_id = formData.get('project_id') as string
+  const starts_at = formData.get('starts_at') as string
+  const ends_at = formData.get('ends_at') as string
+  const location = formData.get('location') as string
+
+  if (!title || !project_id || !starts_at) {
+    return { error: 'Título, proyecto y fecha de inicio son obligatorios' }
+  }
+
+  let final_ends_at = ends_at
+  if (!final_ends_at) {
+    const startDate = new Date(starts_at)
+    startDate.setHours(startDate.getHours() + 1)
+    final_ends_at = startDate.toISOString()
+  }
+
+  const { data, error } = await supabase
+    .from('meetings')
+    .update({
+      title,
+      project_id,
+      starts_at,
+      ends_at: final_ends_at,
+      location: location || null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error updating meeting:', error)
+    return { error: 'No se pudo actualizar la reunión' }
+  }
+
+  await notifyClientForProjectEvent({
+    projectId: project_id,
+    actorId: user?.id,
+    type: 'meeting_updated',
+    title: 'Reunión actualizada',
+    message: title,
+    relatedMeetingId: data.id,
+  })
+
+  revalidatePath('/admin/meetings')
+  revalidatePath('/client/meetings')
+  revalidatePath('/admin/calendar')
+  revalidatePath(`/admin/meetings/${id}/edit`)
+  revalidatePath('/admin')
+  revalidatePath('/client')
   return { success: true, data }
 }
 
@@ -103,7 +188,10 @@ export async function deleteMeetingAction(id: string) {
   if (error) return { error: 'Error al eliminar reunión' }
 
   revalidatePath('/admin/meetings')
+  revalidatePath('/client/meetings')
   revalidatePath('/admin/calendar')
+  revalidatePath('/admin')
+  revalidatePath('/client')
   return { success: true }
 }
 
