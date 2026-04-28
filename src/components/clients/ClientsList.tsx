@@ -178,7 +178,9 @@ export function ClientsList({ initialClients }: ClientsListProps) {
                       </Button>
                     </Box>
                     {client.company && (
-                      <Typography variant="caption" color="text.secondary">{client.company}</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {client.company} {client.ruc && `• RUC: ${client.ruc}`}
+                      </Typography>
                     )}
                   </TableCell>
                   <TableCell>

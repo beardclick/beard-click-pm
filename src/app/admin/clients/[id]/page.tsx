@@ -115,6 +115,24 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                   <Typography variant="body2">{client.company || "No definida"}</Typography>
                 </Box>
 
+                {client.ruc && (
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                      RUC / TAX ID
+                    </Typography>
+                    <Typography variant="body2">{client.ruc}</Typography>
+                  </Box>
+                )}
+
+                {(client.phone || client.profiles?.phone) && (
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                      TELÉFONO
+                    </Typography>
+                    <Typography variant="body2">{client.phone || client.profiles?.phone}</Typography>
+                  </Box>
+                )}
+
                 <Box>
                   <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
                     ACCESO AL PORTAL

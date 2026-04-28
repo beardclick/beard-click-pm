@@ -89,6 +89,17 @@ export function ClientForm({ initialData }: ClientFormProps) {
               size="small"
             />
           </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <TextField
+              id="ruc"
+              name="ruc"
+              label="RUC / Tax ID"
+              placeholder="1234567890"
+              defaultValue={initialData?.ruc || ''}
+              fullWidth
+              size="small"
+            />
+          </Grid>
         </Grid>
 
         {state?.error && (

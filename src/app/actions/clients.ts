@@ -224,6 +224,7 @@ export async function createClientAction(formData: FormData) {
   const email = String(formData.get('email') || '').trim().toLowerCase()
   const phone = String(formData.get('phone') || '').trim()
   const company = String(formData.get('company') || '').trim()
+  const ruc = String(formData.get('ruc') || '').trim()
 
   if (!name || !company) {
     return { error: 'El nombre del cliente y el negocio son obligatorios.' }
@@ -235,6 +236,7 @@ export async function createClientAction(formData: FormData) {
       name,
       email,
       company: company || null,
+      ruc: ruc || null
     }])
     .select()
     .single()
@@ -313,12 +315,20 @@ export async function getClient(id: string) {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('clients')
-    .select('*')
+    .select(`
+      *,
+      profiles (phone)
+    `)
     .eq('id', id)
     .single()
     
   if (error) return null
-  return data
+  
+  // Flatten profiles data into the client object for easier consumption by ClientForm
+  return {
+    ...data,
+    phone: data.profiles?.phone || ''
+  }
 }
 
 export async function getClientDetail(id: string) {
@@ -327,7 +337,10 @@ export async function getClientDetail(id: string) {
 
     const { data: client, error: clientError } = await supabase
       .from('clients')
-      .select('*')
+      .select(`
+        *,
+        profiles (phone)
+      `)
       .eq('id', id)
       .single()
 
@@ -409,45 +422,73 @@ export async function getClientDetail(id: string) {
 
 
 export async function updateClientAction(id: string, formData: FormData) {
-  const supabase = await createClient()
+  const adminContext = await requireAdminAccess()
+  if ('error' in adminContext) {
+    return { error: adminContext.error }
+  }
+
+  const { adminSupabase, currentUser } = adminContext
   
-  const name = formData.get('name') as string
-  const email = formData.get('email') as string
-  const company = formData.get('company') as string
+  const name = String(formData.get('name') || '').trim()
+  const email = String(formData.get('email') || '').trim().toLowerCase()
+  const company = String(formData.get('company') || '').trim()
+  const ruc = String(formData.get('ruc') || '').trim()
+  const phone = String(formData.get('phone') || '').trim()
 
   if (!name || !company) {
     return { error: 'El nombre del cliente y el negocio son obligatorios.' }
   }
 
-  const { data, error } = await supabase
+  // 1. Update client record
+  const { data: updatedClient, error } = await adminSupabase
     .from('clients')
     .update({
       name,
       email,
       company: company || null,
+      ruc: ruc || null,
       updated_at: new Date().toISOString()
     })
     .eq('id', id)
     .select()
+    .single()
 
   if (error) {
     console.error('Error updating client:', error)
-    return { error: 'No se pudo actualizar el cliente' }
-  }
-  // Log de actividad
-  const { data: { user } } = await supabase.auth.getUser()
-  if (user) {
-    await supabase.from('activity_logs').insert([{
-      actor_id: user.id,
-      title: 'Cliente actualizado',
-      description: `actualizó los datos de "${name}"`,
-      type: 'client_created'
-    }])
+    return { error: 'No se pudo actualizar el cliente: ' + error.message }
   }
 
+  // 2. If client has an associated profile, update it too (especially phone)
+  if (updatedClient.profile_id) {
+    const { error: profileError } = await adminSupabase
+      .from('profiles')
+      .update({
+        full_name: name,
+        email: email,
+        phone: phone || null,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', updatedClient.profile_id)
+
+    if (profileError) {
+      console.error('Error updating client profile:', profileError)
+    }
+  }
+
+  // Log de actividad
+  await adminSupabase.from('activity_logs').insert([{
+    actor_id: currentUser.id,
+    client_id: id,
+    title: 'Cliente actualizado',
+    description: `actualizó los datos de "${name}"`,
+    type: 'client_created'
+  }])
+
   revalidatePath('/admin/clients')
+  revalidatePath(`/admin/clients/${id}`)
   revalidatePath(`/admin/clients/${id}/edit`)
-  return { success: true, data }
+  revalidatePath('/admin')
+  return { success: true, data: updatedClient }
 }
 
 export async function sendClientPortalAccessAction(clientId: string) {
