@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
@@ -14,9 +14,12 @@ import Chip from '@mui/material/Chip'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemText from '@mui/material/ListItemText'
+import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import dayjs, { Dayjs } from 'dayjs'
 import { Wrench } from 'lucide-react'
 import { createProjectMaintenanceAction } from '@/app/actions/projects'
 import { notifyAppCountsChanged } from '@/lib/client-events'
+import { formatDateOnly, formatDateTime } from '@/lib/date-utils'
 
 type MaintenanceLog = {
   id: string
@@ -41,27 +44,45 @@ interface WebMaintenanceSectionProps {
 export function WebMaintenanceSection({ projectId, initialLogs }: WebMaintenanceSectionProps) {
   const router = useRouter()
   const formRef = useRef<HTMLFormElement>(null)
-
-  const [state, formAction, isPending] = useActionState<ActionState, FormData>(
-    async (_prevState, formData) => {
-      const result = await createProjectMaintenanceAction(projectId, formData)
-      if (result?.error) {
-        return { error: result.error }
-      }
-      return { success: 'Mantenimiento registrado correctamente.' }
-    },
-    null
-  )
+  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null)
+  const [notes, setNotes] = useState('')
+  const [state, setState] = useState<ActionState>(null)
+  const [isPending, setIsPending] = useState(false)
 
   useEffect(() => {
-    if (!state?.success) {
-      return
-    }
+    if (!state?.success) return
 
-    formRef.current?.reset()
+    setSelectedDate(null)
+    setNotes('')
     notifyAppCountsChanged()
     router.refresh()
   }, [router, state])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!selectedDate || !selectedDate.isValid()) {
+      setState({ error: 'Selecciona una fecha válida.' })
+      return
+    }
+
+    setIsPending(true)
+    setState(null)
+
+    const formData = new FormData()
+    formData.set('maintenance_date', selectedDate.format('YYYY-MM-DD'))
+    formData.set('notes', notes)
+
+    const result = await createProjectMaintenanceAction(projectId, formData)
+
+    if (result?.error) {
+      setState({ error: result.error })
+    } else {
+      setState({ success: 'Mantenimiento registrado correctamente.' })
+    }
+
+    setIsPending(false)
+  }
 
   const latestMaintenanceDate = initialLogs[0]?.maintenance_date || null
   const today = new Date().toISOString().slice(0, 10)
@@ -90,16 +111,20 @@ export function WebMaintenanceSection({ projectId, initialLogs }: WebMaintenance
           </Box>
         </Box>
 
-        <Box component="form" ref={formRef} action={formAction}>
+        <Box component="form" ref={formRef} onSubmit={handleSubmit}>
           <Box sx={{ display: 'grid', gap: 2 }}>
-            <TextField
-              type="date"
-              name="maintenance_date"
+            <DatePicker
               label="Fecha de Vencimiento del Plan"
-              required
-              size="small"
-              fullWidth
-              slotProps={{ inputLabel: { shrink: true } }}
+              value={selectedDate}
+              onChange={(newValue) => setSelectedDate(newValue)}
+              format="DD/MM/YYYY"
+              slotProps={{
+                textField: {
+                  size: 'small',
+                  fullWidth: true,
+                  required: true,
+                },
+              }}
             />
             <TextField
               name="notes"
@@ -109,6 +134,8 @@ export function WebMaintenanceSection({ projectId, initialLogs }: WebMaintenance
               multiline
               rows={2}
               fullWidth
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
             />
           </Box>
 
@@ -153,11 +180,11 @@ export function WebMaintenanceSection({ projectId, initialLogs }: WebMaintenance
                           size="small"
                           color="primary"
                           variant={index === 0 && isMaintenanceActive ? 'filled' : 'outlined'}
-                          label={new Date(`${log.maintenance_date}T00:00:00`).toLocaleDateString()}
+                          label={formatDateOnly(log.maintenance_date)}
                         />
                         <Typography variant="caption" color="text.secondary">
                           Registrado por {log.profiles?.full_name || 'Usuario'} el{' '}
-                          {new Date(log.created_at).toLocaleString()}
+                          {formatDateTime(log.created_at)}
                         </Typography>
                       </Box>
                     }

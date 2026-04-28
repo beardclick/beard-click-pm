@@ -13,6 +13,7 @@ import { Plus, Video, MapPin, Calendar as CalendarIcon, Edit } from "lucide-reac
 import Link from "next/link";
 import { getMeetings } from "@/app/actions/meetings";
 import { AutoRead } from "@/components/layout/AutoRead";
+import { formatDateTime } from "@/lib/date-utils";
 
 export default async function MeetingsPage() {
   const meetingsData = await getMeetings();
@@ -63,7 +64,7 @@ export default async function MeetingsPage() {
                         <CalendarIcon size={14} />
                       </Box>
                       <Typography variant="body2">
-                        {new Date(meeting.starts_at).toLocaleString()}
+                        {formatDateTime(meeting.starts_at)}
                       </Typography>
                     </Box>
                   </TableCell>

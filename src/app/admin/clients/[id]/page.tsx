@@ -16,6 +16,7 @@ import { notFound } from "next/navigation";
 import { getClientDetail } from "@/app/actions/clients";
 import { getReassignableProjectsForClient } from "@/app/actions/projects";
 import { ClientProjectsManager } from "@/components/clients/ClientProjectsManager";
+import { formatDateTime } from "@/lib/date-utils";
 
 export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
@@ -168,7 +169,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                                     {comment.content}
                                   </Typography>
                                   <Typography variant="caption" color="text.secondary">
-                                    {new Date(comment.created_at).toLocaleString()}
+                                    {formatDateTime(comment.created_at)}
                                   </Typography>
                                 </>
                               }
@@ -216,7 +217,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                                     Proyecto: {file.projects?.name || "Sin proyecto"}
                                   </Typography>
                                   <Typography variant="caption" color="text.secondary">
-                                    {(file.profiles?.full_name || file.uploaded_by_profile?.full_name || "Usuario")} • {new Date(file.created_at).toLocaleString()}
+                                    {(file.profiles?.full_name || file.uploaded_by_profile?.full_name || "Usuario")} • {formatDateTime(file.created_at)}
                                   </Typography>
                                 </>
                               }

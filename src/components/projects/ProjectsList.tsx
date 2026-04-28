@@ -24,6 +24,7 @@ import InputLabel from "@mui/material/InputLabel";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import { ProjectDeleteButton } from "@/components/projects/ProjectDeleteButton";
 import { CopyProjectUrlButton } from "@/components/projects/CopyProjectUrlButton";
+import { formatDate } from "@/lib/date-utils";
 
 const statusColor: Record<string, "success" | "warning" | "default" | "error" | "primary"> = {
   "active": "success",
@@ -262,7 +263,7 @@ export function ProjectsList({ initialProjects }: ProjectsListProps) {
                       />
                     </TableCell>
                     <TableCell sx={{ color: "text.secondary", fontSize: "0.875rem" }}>
-                      {new Date(project.created_at).toLocaleDateString()}
+                      {formatDate(project.created_at)}
                     </TableCell>
                     <TableCell align="center">
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, color: project.files_count > 0 ? 'primary.main' : 'text.disabled' }}>

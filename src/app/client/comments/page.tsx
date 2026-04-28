@@ -13,6 +13,7 @@ import Button from "@mui/material/Button";
 import { getClientGlobalComments } from "@/app/actions/comments";
 import Link from "next/link";
 import { getCurrentClientRecord } from "@/lib/client-access";
+import { formatDateTime } from "@/lib/date-utils";
 
 export default async function ClientCommentsPage() {
   const client = await getCurrentClientRecord();
@@ -64,7 +65,7 @@ export default async function ClientCommentsPage() {
                           {comment.content}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          {new Date(comment.created_at).toLocaleString()}
+                          {formatDateTime(comment.created_at)}
                         </Typography>
                       </>
                     }

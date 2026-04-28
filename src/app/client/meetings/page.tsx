@@ -11,6 +11,7 @@ import Chip from "@mui/material/Chip";
 import Link from "@mui/material/Link";
 import { getClientMeetings } from "@/app/actions/meetings";
 import { getCurrentClientRecord } from "@/lib/client-access";
+import { formatDate } from "@/lib/date-utils";
 
 export default async function ClientMeetingsPage() {
   const client = await getCurrentClientRecord();
@@ -47,7 +48,7 @@ export default async function ClientMeetingsPage() {
                 <TableRow key={meeting.id} hover>
                   <TableCell sx={{ fontWeight: 500 }}>{meeting.title}</TableCell>
                   <TableCell>{meeting.projects?.name}</TableCell>
-                  <TableCell>{start.toLocaleDateString()}</TableCell>
+                  <TableCell>{formatDate(start)}</TableCell>
                   <TableCell>{start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</TableCell>
                   <TableCell>{meeting.location || "N/A"}</TableCell>
                   <TableCell>

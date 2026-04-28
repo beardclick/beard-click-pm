@@ -28,6 +28,7 @@ import {
 } from "@/app/actions/notifications";
 import { createClient } from "@/lib/supabase/client";
 import { APP_COUNTS_CHANGED_EVENT, notifyAppCountsChanged } from "@/lib/client-events";
+import { formatDateTime } from "@/lib/date-utils";
 
 interface HeaderProfile {
   full_name: string;
@@ -286,7 +287,7 @@ export function Header() {
                       </Typography>
                     )}
                     <Typography component="span" variant="caption" color="text.secondary">
-                      {new Date(notification.created_at).toLocaleString()}
+                      {formatDateTime(notification.created_at)}
                     </Typography>
                   </Box>
                 }

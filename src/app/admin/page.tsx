@@ -16,6 +16,7 @@ import {
   getUpcomingMeetings 
 } from "@/app/actions/dashboard";
 import { Briefcase, Calendar, MessageSquare, Users, ChevronRight } from "lucide-react";
+import { formatDate, formatDateTime } from "@/lib/date-utils";
 
 export default async function AdminDashboardPage() {
   const [stats, activities, meetings] = await Promise.all([
@@ -107,7 +108,7 @@ export default async function AdminDashboardPage() {
                               <Typography component="span" variant="body2" color="text.primary" sx={{ display: 'inline', mr: 1 }}>
                                 {activity.profiles?.full_name}
                               </Typography>
-                              {activity.description} — {new Date(activity.created_at).toLocaleDateString()}
+                              {activity.description} — {formatDate(activity.created_at)}
                             </>
                           }
                         />
@@ -147,7 +148,7 @@ export default async function AdminDashboardPage() {
                           secondary={
                             <>
                               {meeting.projects?.name}<br/>
-                              {new Date(meeting.starts_at).toLocaleString()}
+                              {formatDateTime(meeting.starts_at)}
                             </>
                           }
                         />

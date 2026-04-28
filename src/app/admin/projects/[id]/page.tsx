@@ -19,6 +19,7 @@ import { CommentsSection } from "@/components/projects/CommentsSection";
 import { FilesSection } from "@/components/projects/FilesSection";
 import { WebMaintenanceSection } from "@/components/projects/WebMaintenanceSection";
 import { notFound } from "next/navigation";
+import { formatDateOnly, formatDateTime } from "@/lib/date-utils";
 
 export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
   const { id } = await params;
@@ -87,7 +88,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
                     <Calendar size={16} />
                     <Typography variant="body2" sx={{fontWeight: 500}}>
-                      {project.due_date ? new Date(project.due_date).toLocaleDateString() : "No definida"}
+                      {project.due_date ? formatDateOnly(project.due_date) : "No definida"}
                     </Typography>
                   </Box>
                 </Box>
@@ -155,7 +156,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5, color: 'text.secondary' }}>
                           <Clock size={14} />
                           <Typography variant="caption">
-                            {new Date(meeting.starts_at).toLocaleString()}
+                            {formatDateTime(meeting.starts_at)}
                           </Typography>
                         </Box>
                         {meeting.meeting_url && (

@@ -13,6 +13,7 @@ import { Send, Trash2 } from 'lucide-react'
 import { createCommentAction, deleteCommentAction } from '@/app/actions/comments'
 import { createClient } from '@/lib/supabase/client'
 import { notifyAppCountsChanged } from '@/lib/client-events'
+import { formatDateTime } from '@/lib/date-utils'
 
 interface Comment {
   id: string
@@ -115,7 +116,7 @@ export function CommentsSection({ projectId, initialComments }: CommentsSectionP
                       {comment.profiles.full_name}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {new Date(comment.created_at).toLocaleString()}
+                      {formatDateTime(comment.created_at)}
                     </Typography>
                   </Box>
                   <Typography variant="body2" color="text.primary">

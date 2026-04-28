@@ -17,6 +17,7 @@ import {
   getClientUpcomingMeetings 
 } from "@/app/actions/dashboard";
 import { getCurrentClientRecord } from "@/lib/client-access";
+import { formatDate, formatDateTime } from "@/lib/date-utils";
 
 export default async function ClientDashboardPage() {
   const client = await getCurrentClientRecord();
@@ -104,7 +105,7 @@ export default async function ClientDashboardPage() {
                               <Typography component="span" variant="body2" color="text.primary" sx={{ display: 'inline', mr: 1 }}>
                                 {activity.profiles?.full_name}
                               </Typography>
-                              {activity.description} — {new Date(activity.created_at).toLocaleDateString()}
+                              {activity.description} — {formatDate(activity.created_at)}
                             </>
                           }
                         />
@@ -143,7 +144,7 @@ export default async function ClientDashboardPage() {
                           secondary={
                             <>
                               {meeting.projects?.name}<br/>
-                              {new Date(meeting.starts_at).toLocaleString()}
+                              {formatDateTime(meeting.starts_at)}
                             </>
                           }
                         />

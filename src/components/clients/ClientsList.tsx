@@ -24,6 +24,7 @@ import TableSortLabel from "@mui/material/TableSortLabel";
 import { ClientDeleteButton } from "@/components/clients/ClientDeleteButton";
 import { ClientPortalAccessButton } from "@/components/clients/ClientPortalAccessButton";
 import { CopyEmailButton } from "@/components/clients/CopyEmailButton";
+import { formatDate } from "@/lib/date-utils";
 
 type SortField = 'name' | 'company' | 'email' | 'created_at' | 'projectsCount';
 type SortOrder = 'asc' | 'desc';
@@ -188,7 +189,7 @@ export function ClientsList({ initialClients }: ClientsListProps) {
                     <Chip label={client.projectsCount} size="small" variant="outlined" sx={{ fontWeight: 600 }} />
                   </TableCell>
                   <TableCell sx={{ fontSize: '0.875rem', color: 'text.secondary' }}>
-                    {new Date(client.created_at).toLocaleDateString()}
+                    {formatDate(client.created_at)}
                   </TableCell>
                   <TableCell align="right">
                     <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>

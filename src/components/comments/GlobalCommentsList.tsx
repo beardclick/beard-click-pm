@@ -20,6 +20,7 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import { Search, Clock } from "lucide-react";
 import Link from "next/link";
+import { formatDateTime } from "@/lib/date-utils";
 
 interface GlobalCommentsListProps {
   initialComments: any[];
@@ -118,7 +119,7 @@ export function GlobalCommentsList({ initialComments }: GlobalCommentsListProps)
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary' }}>
                           <Clock size={12} />
                           <Typography variant="caption">
-                            {new Date(comment.created_at).toLocaleString()}
+                            {formatDateTime(comment.created_at)}
                           </Typography>
                         </Box>
                       </>

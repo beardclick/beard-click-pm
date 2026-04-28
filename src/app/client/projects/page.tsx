@@ -14,6 +14,7 @@ import Chip from "@mui/material/Chip";
 import { getClientProjects } from "@/app/actions/projects";
 import { getCurrentClientRecord } from "@/lib/client-access";
 import { CopyProjectUrlButton } from "@/components/projects/CopyProjectUrlButton";
+import { formatDate, formatDateOnly } from "@/lib/date-utils";
 
 const statusColor: Record<string, "success" | "warning" | "default" | "error" | "primary"> = {
   "active": "success",
@@ -90,7 +91,7 @@ export default async function ClientProjectsPage() {
                           ACTIVO
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          Vence: {new Date(`${project.maintenance_plan_expires_at}T00:00:00`).toLocaleDateString()}
+                          Vence: {formatDateOnly(project.maintenance_plan_expires_at)}
                         </Typography>
                       </Box>
                     ) : (
@@ -107,7 +108,7 @@ export default async function ClientProjectsPage() {
                     />
                   </TableCell>
                   <TableCell sx={{ color: "text.secondary", fontSize: "0.875rem" }}>
-                    {new Date(project.created_at).toLocaleDateString()}
+                    {formatDate(project.created_at)}
                   </TableCell>
                   <TableCell align="center">
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, color: project.files_count > 0 ? 'primary.main' : 'text.disabled' }}>

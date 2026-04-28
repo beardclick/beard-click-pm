@@ -5,6 +5,10 @@ import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { AppThemeMode, getAppTheme } from '@/lib/theme';
 
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import 'dayjs/locale/es';
+
 interface ThemeModeContextValue {
   mode: AppThemeMode;
   toggleMode: () => void;
@@ -58,8 +62,10 @@ export function ThemeRegistry({ children }: { children: React.ReactNode }) {
   return (
     <ThemeModeContext.Provider value={value}>
       <ThemeProvider theme={theme}>
-        <CssBaseline />
-        {children}
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
+          <CssBaseline />
+          {children}
+        </LocalizationProvider>
       </ThemeProvider>
     </ThemeModeContext.Provider>
   );
