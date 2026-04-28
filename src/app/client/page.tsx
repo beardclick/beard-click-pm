@@ -19,17 +19,20 @@ import {
 import { getCurrentClientRecord } from "@/lib/client-access";
 import { formatDate, formatDateTime } from "@/lib/date-utils";
 import AppLink from "@/components/ui/AppLink";
+import { RecentActivityList } from "@/components/dashboard/RecentActivityList";
 
 export default async function ClientDashboardPage() {
   const client = await getCurrentClientRecord();
   
   if (!client) return null;
 
-  const [stats, activities, meetings] = await Promise.all([
+  const [stats, activityData, meetings] = await Promise.all([
     getClientDashboardStats(client.id),
-    getClientActivity(client.id),
+    getClientActivity(client.id, 1, 10),
     getClientUpcomingMeetings(client.id)
   ]);
+
+  const { data: activities, count: activityCount } = activityData as { data: any[], count: number };
 
   const getActivityLink = (activity: any) => {
     if (activity.project_id) return `/client/projects/${activity.project_id}`;
@@ -74,56 +77,13 @@ export default async function ClientDashboardPage() {
         <Grid size={{ xs: 12, md: 8 }}>
           <Card variant="outlined">
             <CardContent>
-              <Typography variant="h6" sx={{ mb: 2 , fontWeight: 600}} >
-                Actividad de mis Proyectos
-              </Typography>
-              <List sx={{ p: 0 }}>
-                {activities.length > 0 ? activities.map((activity, index) => (
-                  <Box key={activity.id}>
-                    <ListItem disablePadding>
-                      <ListItemButton
-                        component={AppLink}
-                        href={getActivityLink(activity)}
-                        sx={{
-                          px: 1,
-                          py: 1.5,
-                          borderRadius: 2,
-                          alignItems: 'flex-start',
-                          color: 'inherit',
-                          '&:hover': { bgcolor: 'action.hover' }
-                        }}
-                      >
-                        <ListItemAvatar>
-                          <Avatar src={activity.profiles?.avatar_url} sx={{ width: 40, height: 40 }}>
-                            {activity.profiles?.full_name?.[0]}
-                          </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={
-                            <Typography variant="subtitle2" sx={{fontWeight: 700}}>
-                              {activity.title}
-                            </Typography>
-                          }
-                          secondary={
-                            <>
-                              <Typography component="span" variant="body2" color="text.primary" sx={{ display: 'inline', mr: 1 }}>
-                                {activity.profiles?.full_name}
-                              </Typography>
-                              {activity.description} — {formatDate(activity.created_at)}
-                            </>
-                          }
-                        />
-                        <ChevronRight size={18} style={{ alignSelf: 'center', opacity: 0.3 }} />
-                      </ListItemButton>
-                    </ListItem>
-                    {index < activities.length - 1 && <Divider component="li" />}
-                  </Box>
-                )) : (
-                  <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
-                    No hay actividad reciente.
-                  </Typography>
-                )}
-              </List>
+              <RecentActivityList 
+                initialActivity={activities} 
+                initialCount={activityCount} 
+                type="client" 
+                clientId={client.id}
+                title="Actividad de mis Proyectos"
+              />
             </CardContent>
           </Card>
         </Grid>

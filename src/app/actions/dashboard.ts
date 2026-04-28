@@ -22,7 +22,7 @@ export async function getDashboardStats() {
   }
 }
 
-export async function getRecentActivity() {
+export async function getRecentActivity(page: number = 1, pageSize: number = 10) {
   const supabase = await createClient()
   
   const { data: { user } } = await supabase.auth.getUser()
@@ -38,21 +38,24 @@ export async function getRecentActivity() {
     lastSeenAt = profile?.last_seen_activity_at || null
   }
   
-  const { data, error } = await supabase
+  const from = (page - 1) * pageSize
+  const to = from + pageSize - 1
+
+  const { data, error, count } = await supabase
     .from('activity_logs')
     .select(`
       *,
       profiles (full_name, avatar_url)
-    `)
+    `, { count: 'exact' })
     .order('created_at', { ascending: false })
-    .limit(15)
+    .range(from, to)
 
   if (error) {
     console.error('Error fetching activity:', error)
-    return { activity: [], lastSeenAt }
+    return { activity: [], lastSeenAt, count: 0 }
   }
 
-  return { activity: data, lastSeenAt }
+  return { activity: data, lastSeenAt, count: count || 0 }
 }
 
 export async function markActivityAsSeenAction() {
@@ -110,27 +113,30 @@ export async function getClientDashboardStats(clientId: string) {
   }
 }
 
-export async function getClientActivity(clientId: string) {
+export async function getClientActivity(clientId: string, page: number = 1, pageSize: number = 10) {
   const supabase = createAdminClient()
   
+  const from = (page - 1) * pageSize
+  const to = from + pageSize - 1
+
   // Obtenemos actividades relacionadas con los proyectos del cliente
-  const { data, error } = await supabase
+  const { data, error, count } = await supabase
     .from('activity_logs')
     .select(`
       *,
       profiles (full_name, avatar_url),
       projects!inner (client_id)
-    `)
+    `, { count: 'exact' })
     .eq('projects.client_id', clientId)
     .order('created_at', { ascending: false })
-    .limit(10)
+    .range(from, to)
 
   if (error) {
     console.error('Error fetching client activity:', error)
-    return []
+    return { data: [], count: 0 }
   }
 
-  return data
+  return { data, count: count || 0 }
 }
 
 export async function getClientUpcomingMeetings(clientId: string) {

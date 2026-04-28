@@ -237,9 +237,9 @@ export function ProjectsList({ initialProjects, isAdmin = true }: ProjectsListPr
                       {project.maintenance_plan_active ? (
                         <Box>
                           <Typography variant="caption" sx={{ color: "primary.main", fontWeight: 700, display: 'block' }}>ACTIVO</Typography>
-                          {project.maintenance_end_date && (
+                          {project.maintenance_plan_expires_at && (
                             <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
-                              Vence: {formatDate(project.maintenance_end_date)}
+                              Vence: {formatDate(project.maintenance_plan_expires_at)}
                             </Typography>
                           )}
                         </Box>
