@@ -224,12 +224,10 @@ export function ProjectsList({ initialProjects, isAdmin = true }: ProjectsListPr
                     <TableCell sx={{ minWidth: 220 }}>
                       {project.primary_website_url ? (
                         <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                          <Box sx={{ minWidth: 0, flex: 1 }}>
-                            <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>
-                              {project.primary_website_url}
-                            </Typography>
-                          </Box>
-                          <CopyProjectUrlButton url={project.primary_website_url} />
+                          <Typography variant="body2" sx={{ fontWeight: 600, maxWidth: 300 }} noWrap>
+                            {project.primary_website_url}
+                          </Typography>
+                          <CopyProjectUrlButton url={project.primary_website_url} size="small" />
                         </Box>
                       ) : (
                         <Typography variant="body2" color="text.secondary">Sin URL</Typography>
@@ -237,7 +235,14 @@ export function ProjectsList({ initialProjects, isAdmin = true }: ProjectsListPr
                     </TableCell>
                     <TableCell>
                       {project.maintenance_plan_active ? (
-                        <Typography variant="caption" sx={{ color: "primary.main", fontWeight: 700 }}>ACTIVO</Typography>
+                        <Box>
+                          <Typography variant="caption" sx={{ color: "primary.main", fontWeight: 700, display: 'block' }}>ACTIVO</Typography>
+                          {project.maintenance_end_date && (
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                              Vence: {formatDate(project.maintenance_end_date)}
+                            </Typography>
+                          )}
+                        </Box>
                       ) : (
                         <Typography variant="caption" color="text.secondary">Inactivo</Typography>
                       )}
